@@ -1,0 +1,26 @@
+import { Ionicons } from '@expo/vector-icons';
+import { Text, Pressable, StyleSheet } from 'react-native';
+
+export const BackButton = ({ onPress }: { onPress: () => void }) => {
+  return (
+    <Pressable style={styles.backButton} onPress={onPress}>
+      <Ionicons name="chevron-back" size={24} color="#22c55e" />
+      <Text style={styles.backButtonText}>Back</Text>
+    </Pressable>
+  );
+};
+
+const styles = StyleSheet.create({
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 16,
+    paddingVertical: 8,
+  },
+  backButtonText: {
+    color: '#22c55e',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+});
