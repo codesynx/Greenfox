@@ -207,6 +207,7 @@
         "restaurant": "Restaurant",
         "spa": "Spa",
         "gym": "Gym"
-    }
+    },
+    "allAmenities": "All Amenities"
   }
 }

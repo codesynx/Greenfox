@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Text, Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
+import { Text } from 'tamagui';
 
 export const BackButton = ({ onPress }: { onPress: () => void }) => {
   return (
     <Pressable style={styles.backButton} onPress={onPress}>
       <Ionicons name="chevron-back" size={24} color="#22c55e" />
-      <Text style={styles.backButtonText}>Back</Text>
+      <Text color="#22c55e" fontSize={16} fontWeight="600" marginLeft={4}>Back</Text>
     </Pressable>
   );
 };
@@ -16,11 +17,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingLeft: 16,
     paddingVertical: 8,
-  },
-  backButtonText: {
-    color: '#22c55e',
-    fontSize: 16,
-    fontWeight: '600',
-    marginLeft: 4,
   },
 });

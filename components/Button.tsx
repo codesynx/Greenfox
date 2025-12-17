@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, TouchableOpacityProps, View } from 'react-native';
+import { Text } from 'tamagui';
 
 type ButtonProps = {
   title?: string;
@@ -8,7 +9,7 @@ type ButtonProps = {
 export const Button = forwardRef<View, ButtonProps>(({ title, ...touchableProps }, ref) => {
   return (
     <TouchableOpacity ref={ref} {...touchableProps} style={[styles.button, touchableProps.style]}>
-      <Text style={styles.buttonText}>{title}</Text>
+      <Text color="#FFFFFF" fontSize={16} fontWeight="600" textAlign="center">{title}</Text>
     </TouchableOpacity>
   );
 });
@@ -33,11 +34,5 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 8,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
   },
 });

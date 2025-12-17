@@ -1,8 +1,74 @@
 import { config } from '@tamagui/config/v3';
-import { createTamagui } from 'tamagui';
+import { createTamagui, createFont } from 'tamagui';
+
+const manropeFont = createFont({
+  family: 'Manrope',
+  size: {
+    1: 12,
+    2: 14,
+    3: 16,
+    4: 20,
+    5: 24,
+    6: 28,
+    7: 32,
+    8: 40,
+    9: 48,
+    10: 64,
+    11: 80,
+    12: 96,
+  },
+  lineHeight: {
+    1: 17,
+    2: 22,
+    3: 25,
+    4: 30,
+    5: 35,
+    6: 40,
+    7: 45,
+    8: 55,
+    9: 65,
+    10: 80,
+    11: 100,
+    12: 120,
+  },
+  weight: {
+    1: '200',
+    2: '300',
+    3: '400',
+    4: '500',
+    5: '600',
+    6: '700',
+    7: '800',
+  },
+  letterSpacing: {
+    1: 0,
+    2: 0,
+    3: 0,
+    4: 0,
+    5: -0.5,
+    6: -0.75,
+    7: -1,
+    8: -1.5,
+    9: -2,
+  },
+  // Face keys must be string to match fontWeight
+  face: {
+    200: { normal: 'ManropeExtraLight' },
+    300: { normal: 'ManropeLight' },
+    400: { normal: 'ManropeRegular' },
+    500: { normal: 'ManropeMedium' },
+    600: { normal: 'ManropeSemiBold' },
+    700: { normal: 'ManropeBold' },
+    800: { normal: 'ManropeExtraBold' },
+  },
+});
 
 const greenfoxConfig = createTamagui({
   ...config,
+  fonts: {
+    heading: manropeFont,
+    body: manropeFont,
+  },
   themes: {
     ...config.themes,
     light: {

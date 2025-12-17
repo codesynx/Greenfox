@@ -1,7 +1,7 @@
 import { createStaticNavigation, StaticParamList } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text } from 'react-native';
+import { Text } from 'tamagui';
 import { useTranslation } from 'react-i18next';
 import OnboardingScreen from '../screens/onboarding';
 import PhoneNumberScreen from '../screens/phone-number';

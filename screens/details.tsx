@@ -1,27 +1,34 @@
-import { ScrollView, Image, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { useState, useRef } from 'react';
+import { ScrollView, Image, StyleSheet, Pressable, Dimensions, View, Animated } from 'react-native';
 import { YStack, XStack, Text, Button } from 'tamagui';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
-import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import {
+  ArrowLeft,
+  Heart,
+  More,
+  Location,
+  Wifi,
+  Car,
+  Coffee,
+  Sun1,
+  Weight,
+  ArrowRight,
+  Verify
+} from 'iconsax-react-native';
 
 const { width } = Dimensions.get('window');
 
-interface Amenity {
-  id: string;
-  key: string;
-  icon: keyof typeof Ionicons.glyphMap;
-}
-
-const amenities: Amenity[] = [
-  { id: '1', key: 'wifi', icon: 'wifi' },
-  { id: '2', key: 'pool', icon: 'water' },
-  { id: '3', key: 'parking', icon: 'car' },
-  { id: '4', key: 'restaurant', icon: 'restaurant' },
-  { id: '5', key: 'spa', icon: 'flower' },
-  { id: '6', key: 'gym', icon: 'barbell' },
+const amenitiesData = [
+  { id: '1', key: 'wifi', Icon: Wifi },
+  { id: '2', key: 'pool', Icon: Sun1 },
+  { id: '3', key: 'parking', Icon: Car },
+  { id: '4', key: 'restaurant', Icon: Coffee },
+  { id: '5', key: 'spa', Icon: Sun1 },
+  { id: '6', key: 'gym', Icon: Weight },
 ];
 
 export default function Details() {
@@ -29,6 +36,29 @@ export default function Details() {
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  // State for Favorites and Toast
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  const toggleFavorite = () => {
+    if (isFavorite) {
+      setIsFavorite(false);
+    } else {
+      setIsFavorite(true);
+      showToastNotification(t('home.savedToast'));
+    }
+  };
+
+  const showToastNotification = (message: string) => {
+    setShowToast(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start(() => setShowToast(false));
+  };
 
   // Mock data - in real app this would come from navigation params or API
   const property = {
@@ -55,92 +85,83 @@ export default function Details() {
 
   return (
     <YStack flex={1} backgroundColor="#0a0a0a">
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Hero Image with Gradient Fade */}
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 180 }}>
+        {/* Hero Image Section */}
         <YStack position="relative">
           <Image source={{ uri: property.image }} style={styles.heroImage} />
-
-          {/* Floating Back Button */}
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={[styles.backButton, { top: insets.top + 16 }]}
-          >
-            <BlurView intensity={60} tint="dark" style={styles.backButtonBlur}>
-              <Ionicons name="arrow-back" size={24} color="#ffffff" />
-            </BlurView>
-          </Pressable>
-
-          {/* Gradient Overlay - Fades to background */}
+          
+          {/* Transparent Header Overlay */}
           <LinearGradient
-            colors={['rgba(10, 10, 10, 0)', 'rgba(10, 10, 10, 0.7)', '#0a0a0a']}
-            style={styles.gradientOverlay}
-            locations={[0, 0.7, 1]}
+            colors={['rgba(0,0,0,0.6)', 'transparent']}
+            style={[styles.headerGradient, { height: insets.top + 60 }]}
           />
+          
+          <XStack 
+            position="absolute" 
+            top={insets.top} 
+            left={0} 
+            right={0} 
+            paddingHorizontal="$4" 
+            paddingVertical="$2"
+            justifyContent="space-between" 
+            alignItems="center"
+            zIndex={10}
+          >
+            <Pressable onPress={() => navigation.goBack()}>
+              <ArrowLeft size={28} color="#ffffff" />
+            </Pressable>
+            <XStack gap="$4" alignItems="center">
+              <Pressable onPress={toggleFavorite}>
+                <Heart 
+                  size={28} 
+                  color={isFavorite ? "#ef4444" : "#ffffff"} 
+                  variant={isFavorite ? "Bold" : "Linear"}
+                />
+              </Pressable>
+              <Pressable>
+                <More size={28} color="#ffffff" style={{ transform: [{ rotate: '90deg' }] }} />
+              </Pressable>
+            </XStack>
+          </XStack>
 
-          {/* Floating Info Card on Hero */}
-          <YStack position="absolute" bottom={-40} left={16} right={16}>
-            <BlurView intensity={60} tint="dark" style={styles.heroCard}>
-              <YStack padding="$4">
-                <XStack justifyContent="space-between" alignItems="flex-start" marginBottom="$2">
-                  <YStack flex={1} marginRight="$3">
-                    <Text fontSize={24} fontWeight="700" color="#ffffff" numberOfLines={2}>
-                      {property.name}
-                    </Text>
-                    <XStack alignItems="center" marginTop="$2" gap="$1">
-                      <Ionicons name="location" size={16} color="rgba(255, 255, 255, 0.7)" />
-                      <Text fontSize={14} color="rgba(255, 255, 255, 0.7)">
-                        {property.location}
-                      </Text>
-                    </XStack>
-                  </YStack>
-                  <YStack alignItems="flex-end">
-                    <XStack alignItems="center" gap="$1">
-                      <Ionicons name="star" size={20} color="#22c55e" />
-                      <Text fontSize={20} fontWeight="700" color="#ffffff">
-                        {property.rating}
-                      </Text>
-                    </XStack>
-                    <Text fontSize={12} color="rgba(255, 255, 255, 0.6)" marginTop="$1">
-                      {property.reviews} {t('details.reviews')}
-                    </Text>
-                  </YStack>
-                </XStack>
-              </YStack>
-            </BlurView>
-          </YStack>
+          {/* Carousel Indicator */}
+          <XStack 
+            position="absolute" 
+            bottom={20} 
+            left={0} 
+            right={0} 
+            justifyContent="center" 
+            gap="$2"
+          >
+            {property.images.map((_, index) => (
+              <View 
+                key={index} 
+                style={[
+                  styles.indicatorBar, 
+                  { backgroundColor: index === 0 ? '#ffffff' : 'rgba(255, 255, 255, 0.4)' }
+                ]} 
+              />
+            ))}
+          </XStack>
         </YStack>
 
         {/* Content Section */}
-        <YStack paddingHorizontal="$4" paddingTop={60} paddingBottom="$24">
-          {/* Host Info */}
-          <YStack
-            backgroundColor="rgba(255, 255, 255, 0.05)"
-            borderRadius={16}
-            padding="$4"
-            marginBottom="$5"
-            borderWidth={1}
-            borderColor="rgba(255, 255, 255, 0.1)"
-          >
-            <XStack alignItems="center" gap="$3">
-              <Image source={{ uri: property.host.avatar }} style={styles.hostAvatar} />
-              <YStack flex={1}>
-                <XStack alignItems="center" gap="$2">
-                  <Text fontSize={16} fontWeight="600" color="#ffffff">
-                    {t('details.hostedBy')} {property.host.name}
-                  </Text>
-                  {property.host.verified && (
-                    <Ionicons name="checkmark-circle" size={18} color="#22c55e" />
-                  )}
-                </XStack>
-                <Text fontSize={13} color="rgba(255, 255, 255, 0.6)" marginTop="$1">
-                  {t('details.verifiedHost')}
-                </Text>
-              </YStack>
-            </XStack>
-          </YStack>
+        <YStack paddingHorizontal="$4" paddingTop="$5">
+          {/* Title */}
+          <Text fontSize={28} fontWeight="700" color="#ffffff" lineHeight={34}>
+            {property.name}
+          </Text>
 
-          {/* Description */}
-          <YStack marginBottom="$5">
+          {/* Address */}
+          <XStack alignItems="center" gap="$2" marginTop="$2">
+            <Location size={20} color="#22c55e" variant="Bold" />
+            <Text fontSize={15} color="rgba(255, 255, 255, 0.7)">
+              {property.location}
+            </Text>
+          </XStack>
+
+          {/* About */}
+          <YStack marginTop="$6">
             <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$3">
               {t('details.about')}
             </Text>
@@ -149,46 +170,49 @@ export default function Details() {
             </Text>
           </YStack>
 
-          {/* Amenities - 2 Column Grid */}
-          <YStack marginBottom="$5">
-            <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$3">
+          {/* Popular Amenities */}
+          <YStack marginTop="$6">
+            <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$4">
               {t('details.amenities')}
             </Text>
-            <XStack flexWrap="wrap" gap="$3">
-              {amenities.map((amenity) => (
-                <XStack
-                  key={amenity.id}
-                  backgroundColor="rgba(255, 255, 255, 0.05)"
-                  padding="$3"
-                  borderRadius={12}
-                  alignItems="center"
-                  gap="$3"
-                  borderWidth={1}
-                  borderColor="rgba(255, 255, 255, 0.1)"
-                  width="48%"
-                >
-                  <YStack
-                    width={40}
-                    height={40}
-                    backgroundColor="rgba(34, 197, 94, 0.2)"
-                    borderRadius={20}
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                  >
-                    <Ionicons name={amenity.icon} size={20} color="#22c55e" />
+            
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+              <XStack gap="$4">
+                {amenitiesData.map((amenity) => (
+                  <YStack key={amenity.id} alignItems="center" gap="$2" width={80}>
+                    <YStack 
+                      width={64} 
+                      height={64} 
+                      borderRadius={32} 
+                      backgroundColor="rgba(255, 255, 255, 0.05)" 
+                      justifyContent="center" 
+                      alignItems="center"
+                      borderWidth={1}
+                      borderColor="rgba(255, 255, 255, 0.1)"
+                    >
+                      <amenity.Icon size={28} color="#22c55e" />
+                    </YStack>
+                    <Text fontSize={12} color="rgba(255, 255, 255, 0.7)" textAlign="center" numberOfLines={2}>
+                      {t(`details.amenityList.${amenity.key}`)}
+                    </Text>
                   </YStack>
-                  <Text fontSize={14} color="#ffffff" fontWeight="500" flex={1} numberOfLines={1}>
-                    {t(`details.amenityList.${amenity.key}`)}
-                  </Text>
-                </XStack>
-              ))}
-            </XStack>
+                ))}
+              </XStack>
+            </ScrollView>
+
+            <Pressable style={{ marginTop: 24 }}>
+              <XStack alignItems="center" gap="$2">
+                <Text fontSize={15} color="#22c55e" fontWeight="600">
+                  {t('details.allAmenities')}
+                </Text>
+                <ArrowRight size={16} color="#22c55e" />
+              </XStack>
+            </Pressable>
           </YStack>
 
           {/* Photo Gallery */}
-          <YStack marginBottom="$5">
-            <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$3">
+          <YStack marginTop="$6" marginBottom="$4">
+            <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$4">
               {t('details.photos')}
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -201,36 +225,52 @@ export default function Details() {
               </XStack>
             </ScrollView>
           </YStack>
+
         </YStack>
       </ScrollView>
 
       {/* Fixed Bottom Booking Bar */}
       <YStack position="absolute" bottom={0} left={0} right={0}>
         <BlurView intensity={80} tint="dark" style={styles.bookingBar}>
-          <YStack padding="$4" paddingBottom={insets.bottom + 16}>
-            <XStack alignItems="center" justifyContent="space-between">
-              <YStack flex={1} marginRight="$3">
-                <XStack alignItems="baseline" gap="$1">
-                  <Text fontSize={28} fontWeight="700" color="#22c55e">
-                    ₸{property.price.toLocaleString()}
-                  </Text>
-                  <Text fontSize={14} color="rgba(255, 255, 255, 0.6)">
-                    {t('details.night')}
-                  </Text>
-                </XStack>
-                <Text fontSize={12} color="rgba(255, 255, 255, 0.5)" marginTop="$1">
-                  {t('details.excludesTaxes')}
+          <YStack padding="$4" paddingBottom={insets.bottom + 16} gap="$3">
+            {/* Price Info Row */}
+            <YStack>
+              <XStack alignItems="baseline" gap="$1">
+                <Text fontSize={28} fontWeight="700" color="#ffffff">
+                  ₸{property.price.toLocaleString()}
                 </Text>
-              </YStack>
+                <Text fontSize={14} color="rgba(255, 255, 255, 0.6)">
+                  {t('details.night')}
+                </Text>
+              </XStack>
+              <Text fontSize={12} color="rgba(255, 255, 255, 0.5)" marginTop={4}>
+                {t('details.excludesTaxes')}
+              </Text>
+            </YStack>
+
+            {/* Button Row */}
+            <XStack gap="$3">
+              <Pressable 
+                onPress={toggleFavorite}
+                style={[
+                  styles.heartButton,
+                  isFavorite && styles.heartButtonActive
+                ]}
+              >
+                <Heart 
+                  size={28} 
+                  color={isFavorite ? "#ef4444" : "#ffffff"} 
+                  variant={isFavorite ? "Bold" : "Linear"}
+                />
+              </Pressable>
               <Button
+                flex={1}
                 backgroundColor="#22c55e"
                 color="white"
-                paddingHorizontal="$8"
                 height={56}
                 borderRadius={999}
                 fontSize={16}
                 fontWeight="600"
-                flexShrink={0}
                 pressStyle={{ backgroundColor: '#16a34a' }}
               >
                 {t('details.reserve')}
@@ -239,6 +279,18 @@ export default function Details() {
           </YStack>
         </BlurView>
       </YStack>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <Animated.View style={[styles.toastContainer, { opacity: toastOpacity, top: insets.top + 60 }]}>
+          <BlurView intensity={40} tint="dark" style={styles.toastBlur}>
+            <XStack alignItems="center" gap="$2" paddingHorizontal="$4" paddingVertical="$3">
+              <Verify size={20} color="#22c55e" variant="Bold" />
+              <Text color="white" fontWeight="600">{t('home.savedToast')}</Text>
+            </XStack>
+          </BlurView>
+        </Animated.View>
+      )}
     </YStack>
   );
 }
@@ -246,58 +298,23 @@ export default function Details() {
 const styles = StyleSheet.create({
   heroImage: {
     width,
-    height: 400,
+    height: 450,
     backgroundColor: '#1a1a1a',
   },
-  gradientOverlay: {
+  headerGradient: {
     position: 'absolute',
-    bottom: 0,
+    top: 0,
     left: 0,
     right: 0,
-    height: 200,
   },
-  backButton: {
-    position: 'absolute',
-    left: 16,
-    zIndex: 10,
-  },
-  backButtonBlur: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  heroCard: {
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 12,
-  },
-  hostAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#1a1a1a',
-    borderWidth: 2,
-    borderColor: 'rgba(34, 197, 94, 0.5)',
+  indicatorBar: {
+    width: 24,
+    height: 3,
+    borderRadius: 1.5,
   },
   galleryImage: {
-    width: 200,
-    height: 150,
+    width: width * 0.42,
+    height: 120,
     borderRadius: 12,
     backgroundColor: '#1a1a1a',
   },
@@ -306,4 +323,33 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
     overflow: 'hidden',
   },
+  heartButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  heartButtonActive: {
+    borderColor: 'rgba(239, 68, 68, 0.3)',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  toastContainer: {
+    position: 'absolute',
+    alignSelf: 'center',
+    zIndex: 200,
+    borderRadius: 999,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  toastBlur: {
+    borderRadius: 999,
+  }
 });

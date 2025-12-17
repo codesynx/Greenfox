@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
-
+import { StyleSheet, View } from 'react-native';
+import { Text } from 'tamagui';
 
 
 export default function EditScreenInfo({ path }: { path: string }) {
