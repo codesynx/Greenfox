@@ -187,7 +187,9 @@
       "lowToHigh": "Сначала дешевле",
       "highToLow": "Сначала дороже",
       "propertyType": "Тип жилья",
-      "showResults": "Показать результаты"
+      "showResults": "Показать результаты",
+      "reset": "Сбросить",
+      "apply": "Применить"
     },
     "search": {
       "recent": "НЕДАВНИЕ ПОИСКИ",
@@ -213,5 +215,16 @@
         "gym": "Тренажерный зал"
     },
     "allAmenities": "Все удобства"
+  },
+  "selectDate": {
+    "title": "Выберите даты",
+    "checkIn": "Заезд",
+    "checkOut": "Выезд",
+    "guests": "Гости",
+    "guestsCount": "Гостей",
+    "price": "Цена:",
+    "night": "/Ночь",
+    "confirm": "Подтвердить",
+    "select": "Выбрать"
   }
 }

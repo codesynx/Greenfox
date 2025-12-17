@@ -11,12 +11,13 @@ import FavoritesScreen from '../screens/favorites';
 import BookingsScreen from '../screens/bookings';
 import ProfileScreen from '../screens/profile';
 import Details from '../screens/details';
+import SelectDateScreen from '../screens/select-date';
 import EditProfileScreen from '../screens/edit-profile';
 import HelpCenterScreen from '../screens/help-center';
 import TermsScreen from '../screens/terms';
 import PrivacyScreen from '../screens/privacy';
 import NotificationsScreen from '../screens/notifications';
-import { Ionicons } from '@expo/vector-icons';
+import { Home, Heart, Calendar, User } from 'iconsax-react-native';
 
 const TabLabel = ({ titleKey, color }: { titleKey: string; color: string }) => {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ const Tabs = createBottomTabNavigator({
       options: {
         tabBarLabel: ({ color }) => <TabLabel titleKey="tabs.home" color={color} />,
         tabBarIcon: ({ color, focused }) => (
-          <Ionicons name={focused ? 'home' : 'home-outline'} size={24} color={color} />
+          <Home size={24} color={color} variant={focused ? 'Bold' : 'Linear'} />
         ),
       },
     },
@@ -52,7 +53,7 @@ const Tabs = createBottomTabNavigator({
       options: {
         tabBarLabel: ({ color }) => <TabLabel titleKey="tabs.favorites" color={color} />,
         tabBarIcon: ({ color, focused }) => (
-          <Ionicons name={focused ? 'heart' : 'heart-outline'} size={24} color={color} />
+          <Heart size={24} color={color} variant={focused ? 'Bold' : 'Linear'} />
         ),
       },
     },
@@ -61,7 +62,7 @@ const Tabs = createBottomTabNavigator({
       options: {
         tabBarLabel: ({ color }) => <TabLabel titleKey="tabs.bookings" color={color} />,
         tabBarIcon: ({ color, focused }) => (
-          <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={24} color={color} />
+          <Calendar size={24} color={color} variant={focused ? 'Bold' : 'Linear'} />
         ),
       },
     },
@@ -70,7 +71,7 @@ const Tabs = createBottomTabNavigator({
       options: {
         tabBarLabel: ({ color }) => <TabLabel titleKey="tabs.profile" color={color} />,
         tabBarIcon: ({ color, focused }) => (
-          <Ionicons name={focused ? 'person' : 'person-outline'} size={24} color={color} />
+          <User size={24} color={color} variant={focused ? 'Bold' : 'Linear'} />
         ),
       },
     },
@@ -105,6 +106,12 @@ const Stack = createStackNavigator({
     },
     Details: {
       screen: Details,
+      options: {
+        headerShown: false,
+      },
+    },
+    SelectDate: {
+      screen: SelectDateScreen,
       options: {
         headerShown: false,
       },

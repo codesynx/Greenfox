@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Pressable, Animated, ScrollView } from 'react-native';
-import { YStack, XStack, Text, Button } from 'tamagui';
+import { YStack, XStack, Text, Button, Slider } from 'tamagui';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -14,90 +14,199 @@ interface FilterModalProps {
 export const FilterModal = ({ visible, onClose }: FilterModalProps) => {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
-  const filterAnim = useRef(new Animated.Value(0)).current;
+  const anim = useRef(new Animated.Value(0)).current;
+  
+  // State
+  const [priceRange, setPriceRange] = useState([20000, 150000]);
+  const [selectedType, setSelectedType] = useState('any');
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    Animated.timing(filterAnim, {
+    Animated.spring(anim, {
       toValue: visible ? 1 : 0,
-      duration: 300,
       useNativeDriver: true,
+      stiffness: 100,
+      damping: 15,
+      mass: 1,
     }).start();
   }, [visible]);
 
-  if (!visible && (filterAnim as any)._value === 0) return null;
+  if (!visible && (anim as any)._value === 0) return null;
+
+  const amenitiesList = ['wifi', 'pool', 'parking', 'restaurant', 'spa', 'gym'];
+  const propertyTypes = ['any', 'hotel', 'resort', 'villa', 'apartment'];
+
+  const toggleAmenity = (amenity: string) => {
+    const newSet = new Set(selectedAmenities);
+    if (newSet.has(amenity)) newSet.delete(amenity);
+    else newSet.add(amenity);
+    setSelectedAmenities(newSet);
+  };
+
+  const formatPrice = (price: number) => {
+    return `₸${price.toLocaleString()}`;
+  };
 
   return (
     <Animated.View 
       style={[
         styles.modalOverlay,
-        { opacity: filterAnim },
-        !visible && { pointerEvents: 'none' } // Prevent clicks when fading out
+        { 
+          opacity: anim,
+          transform: [
+            {
+              translateY: anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [50, 0]
+              })
+            },
+            {
+              scale: anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.95, 1]
+              })
+            }
+          ]
+        },
+        !visible && { pointerEvents: 'none' }
       ]}
     >
-      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
-      <Animated.View 
-        style={[
-          styles.modalContainer,
-          {
-            transform: [{
-              translateY: filterAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [600, 0] // Slide up from 600px
-              })
-            }]
-          }
-        ]}
-      >
-        <BlurView intensity={90} tint="dark" style={styles.modalContent}>
-          <YStack padding="$4" paddingBottom={insets.bottom + 20} gap="$4">
-            <XStack justifyContent="space-between" alignItems="center" marginBottom="$2">
-              <Text fontSize={20} fontWeight="700" color="#ffffff">{t('home.filters.title')}</Text>
-              <Pressable onPress={onClose}>
-                <Ionicons name="close-circle" size={28} color="rgba(255,255,255,0.5)" />
-              </Pressable>
-            </XStack>
-            
-            <YStack gap="$3">
+      <BlurView intensity={100} tint="dark" style={StyleSheet.absoluteFill}>
+        <YStack flex={1} paddingTop={insets.top}>
+          {/* Header */}
+          <XStack alignItems="center" paddingHorizontal="$4" paddingVertical="$4" gap="$4">
+            <Pressable onPress={onClose}>
+              <Ionicons name="arrow-back" size={24} color="white" />
+            </Pressable>
+            <Text fontSize={20} fontWeight="700" color="white">{t('home.filters.title')}</Text>
+          </XStack>
+
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+            {/* Price Range */}
+            <YStack gap="$4" marginBottom="$6">
               <Text fontSize={16} fontWeight="600" color="white">{t('home.filters.priceRange')}</Text>
-              <XStack gap="$3">
-                <Button flex={1} backgroundColor="rgba(255,255,255,0.1)" color="white" borderRadius="$4">{t('home.filters.lowToHigh')}</Button>
-                <Button flex={1} backgroundColor="#22c55e" color="white" borderRadius="$4">{t('home.filters.highToLow')}</Button>
+              
+              {/* Histogram Simulation */}
+              <XStack alignItems="flex-end" height={60} gap="$1" paddingHorizontal="$2" marginBottom="$2">
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <YStack 
+                    key={i} 
+                    flex={1} 
+                    backgroundColor="#22c55e" 
+                    opacity={0.3} 
+                    height={`${Math.random() * 60 + 20}%`} 
+                    borderRadius={2} 
+                  />
+                ))}
+              </XStack>
+              
+              <Slider 
+                defaultValue={[20000, 150000]} 
+                max={500000} 
+                step={1000} 
+                onValueChange={(val) => setPriceRange(val as number[])}
+              >
+                <Slider.Track backgroundColor="rgba(255,255,255,0.1)" height={4}>
+                  <Slider.TrackActive backgroundColor="#22c55e" />
+                </Slider.Track>
+                <Slider.Thumb index={0} circular size="$3" backgroundColor="white" borderWidth={2} borderColor="#22c55e" elevation={5} />
+                <Slider.Thumb index={1} circular size="$3" backgroundColor="white" borderWidth={2} borderColor="#22c55e" elevation={5} />
+              </Slider>
+
+              <XStack justifyContent="space-between" marginTop="$2">
+                <Text color="white" fontSize={16} fontWeight="600">{formatPrice(priceRange[0])}</Text>
+                <Text color="white" fontSize={16} fontWeight="600">{formatPrice(priceRange[1])}</Text>
               </XStack>
             </YStack>
 
-            <YStack gap="$3">
+            {/* Property Type */}
+            <YStack gap="$4" marginBottom="$6">
               <Text fontSize={16} fontWeight="600" color="white">{t('home.filters.propertyType')}</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <XStack gap="$2">
-                  {['any', 'hotel', 'resort', 'villa', 'apartment'].map((type, i) => (
-                    <Button 
-                      key={type} 
-                      backgroundColor={i === 0 ? '#22c55e' : 'rgba(255,255,255,0.1)'} 
-                      color="white" 
-                      borderRadius="$4" 
-                      size="$3"
+              <XStack flexWrap="wrap" gap="$3">
+                {propertyTypes.map(type => (
+                  <Pressable key={type} onPress={() => setSelectedType(type)}>
+                    <XStack 
+                      backgroundColor={selectedType === type ? '#22c55e' : 'rgba(255,255,255,0.08)'}
+                      paddingHorizontal="$4" 
+                      paddingVertical="$3" 
+                      borderRadius={999}
+                      borderWidth={1}
+                      borderColor={selectedType === type ? '#22c55e' : 'rgba(255,255,255,0.1)'}
                     >
-                      {t(`home.categories.${type}`)}
-                    </Button>
-                  ))}
-                </XStack>
-              </ScrollView>
+                      <Text color={selectedType === type ? 'black' : 'rgba(255,255,255,0.8)'} fontWeight="600" fontSize={14}>
+                        {t(`home.categories.${type}`)}
+                      </Text>
+                    </XStack>
+                  </Pressable>
+                ))}
+              </XStack>
             </YStack>
-            
+
+            {/* Amenities */}
+            <YStack gap="$4">
+              <XStack gap="$2" alignItems="center">
+                <Text fontSize={16} fontWeight="600" color="white">{t('details.amenities')}</Text>
+                <Ionicons name="information-circle" size={16} color="rgba(255,255,255,0.5)" />
+              </XStack>
+              <XStack flexWrap="wrap" gap="$3">
+                {amenitiesList.map(item => {
+                  const isSelected = selectedAmenities.has(item);
+                  return (
+                    <Pressable key={item} onPress={() => toggleAmenity(item)}>
+                      <XStack 
+                        backgroundColor={isSelected ? '#22c55e' : 'rgba(255,255,255,0.08)'}
+                        paddingHorizontal="$4" 
+                        paddingVertical="$3" 
+                        borderRadius={999}
+                        borderWidth={1}
+                        borderColor={isSelected ? '#22c55e' : 'rgba(255,255,255,0.1)'}
+                      >
+                        <Text color={isSelected ? 'black' : 'rgba(255,255,255,0.8)'} fontWeight="600" fontSize={14}>
+                          {t(`details.amenityList.${item}`)}
+                        </Text>
+                      </XStack>
+                    </Pressable>
+                  );
+                })}
+              </XStack>
+            </YStack>
+          </ScrollView>
+
+          {/* Footer Buttons */}
+          <XStack padding="$4" gap="$3" paddingBottom={insets.bottom + 10} backgroundColor="transparent">
             <Button 
-              backgroundColor="#22c55e" 
+              flex={1} 
+              backgroundColor="transparent" 
+              borderColor="rgba(255,255,255,0.5)" 
+              borderWidth={1} 
               color="white" 
-              marginTop="$4" 
-              borderRadius={999}
+              borderRadius={999} 
+              height={56} 
+              fontSize={16}
+              fontWeight="600"
+              onPress={() => {
+                setPriceRange([20000, 150000]);
+                setSelectedType('any');
+                setSelectedAmenities(new Set());
+              }}
+            >
+              {t('home.filters.reset')}
+            </Button>
+            <Button 
+              flex={1} 
+              backgroundColor="#22c55e" 
+              color="black" 
+              borderRadius={999} 
+              height={56} 
+              fontSize={16}
               fontWeight="700"
-              height={56}
               onPress={onClose}
             >
-              {t('home.filters.showResults')}
+              {t('home.filters.apply')}
             </Button>
-          </YStack>
-        </BlurView>
-      </Animated.View>
+          </XStack>
+        </YStack>
+      </BlurView>
     </Animated.View>
   );
 };
@@ -105,23 +214,6 @@ export const FilterModal = ({ visible, onClose }: FilterModalProps) => {
 const styles = StyleSheet.create({
   modalOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     zIndex: 100,
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 20,
-  },
-  modalContent: {
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    backgroundColor: 'rgba(20, 20, 20, 0.95)',
   },
 });

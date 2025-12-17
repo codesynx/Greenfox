@@ -272,6 +272,7 @@ export default function Details() {
                 fontSize={16}
                 fontWeight="600"
                 pressStyle={{ backgroundColor: '#16a34a' }}
+                onPress={() => navigation.navigate('SelectDate', { property })}
               >
                 {t('details.reserve')}
               </Button>

@@ -183,7 +183,9 @@
       "lowToHigh": "Low to High",
       "highToLow": "High to Low",
       "propertyType": "Property Type",
-      "showResults": "Show Results"
+      "showResults": "Show Results",
+      "reset": "Reset",
+      "apply": "Apply"
     },
     "search": {
       "recent": "RECENT SEARCHES",
@@ -209,5 +211,16 @@
         "gym": "Gym"
     },
     "allAmenities": "All Amenities"
+  },
+  "selectDate": {
+    "title": "Select Date",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "guests": "Guests",
+    "guestsCount": "Guests",
+    "price": "Price:",
+    "night": "/Night",
+    "confirm": "Confirm",
+    "select": "Select"
   }
 }
