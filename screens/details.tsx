@@ -6,9 +6,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import {
   ArrowLeft,
-  Heart,
   More,
   Location,
   Wifi,
@@ -17,7 +17,6 @@ import {
   Sun1,
   Weight,
   ArrowRight,
-  Verify
 } from 'iconsax-react-native';
 
 const { width } = Dimensions.get('window');
@@ -112,10 +111,10 @@ export default function Details() {
             </Pressable>
             <XStack gap="$4" alignItems="center">
               <Pressable onPress={toggleFavorite}>
-                <Heart 
+                <Ionicons 
+                  name={isFavorite ? "heart" : "heart-outline"} 
                   size={28} 
-                  color={isFavorite ? "#ef4444" : "#ffffff"} 
-                  variant={isFavorite ? "Bold" : "Linear"}
+                  color={isFavorite ? "#22c55e" : "#ffffff"} 
                 />
               </Pressable>
               <Pressable>
@@ -257,10 +256,10 @@ export default function Details() {
                   isFavorite && styles.heartButtonActive
                 ]}
               >
-                <Heart 
+                <Ionicons 
+                  name={isFavorite ? "heart" : "heart-outline"} 
                   size={28} 
-                  color={isFavorite ? "#ef4444" : "#ffffff"} 
-                  variant={isFavorite ? "Bold" : "Linear"}
+                  color={isFavorite ? "#22c55e" : "#ffffff"} 
                 />
               </Pressable>
               <Button
@@ -286,7 +285,7 @@ export default function Details() {
         <Animated.View style={[styles.toastContainer, { opacity: toastOpacity, top: insets.top + 60 }]}>
           <BlurView intensity={40} tint="dark" style={styles.toastBlur}>
             <XStack alignItems="center" gap="$2" paddingHorizontal="$4" paddingVertical="$3">
-              <Verify size={20} color="#22c55e" variant="Bold" />
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
               <Text color="white" fontWeight="600">{t('home.savedToast')}</Text>
             </XStack>
           </BlurView>
@@ -335,8 +334,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   heartButtonActive: {
-    borderColor: 'rgba(239, 68, 68, 0.3)',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderColor: 'rgba(34, 197, 94, 0.3)',
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
   },
   toastContainer: {
     position: 'absolute',

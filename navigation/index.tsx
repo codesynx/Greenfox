@@ -17,6 +17,8 @@ import HelpCenterScreen from '../screens/help-center';
 import TermsScreen from '../screens/terms';
 import PrivacyScreen from '../screens/privacy';
 import NotificationsScreen from '../screens/notifications';
+import PaymentScreen from '../screens/payment';
+import AddCardScreen from '../screens/add-card';
 import { Home, Heart, Calendar, User } from 'iconsax-react-native';
 
 const TabLabel = ({ titleKey, color }: { titleKey: string; color: string }) => {
@@ -134,6 +136,14 @@ const Stack = createStackNavigator({
     },
     Notifications: {
       screen: NotificationsScreen,
+      options: { headerShown: false },
+    },
+    Payment: {
+      screen: PaymentScreen,
+      options: { headerShown: false },
+    },
+    AddCard: {
+      screen: AddCardScreen,
       options: { headerShown: false },
     },
   },

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { StatusBar, TextInput, StyleSheet, Animated, TouchableOpacity } from 'react-native';
+import { StatusBar, TextInput, StyleSheet, Animated, TouchableOpacity, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { YStack, XStack, Text, Button } from 'tamagui';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -93,78 +93,80 @@ export default function OTPScreen() {
   return (
     <>
       <StatusBar barStyle="light-content" />
-      <YStack flex={1} backgroundColor="#0a0a0a" paddingHorizontal="$6" paddingTop={insets.top} paddingBottom={insets.bottom} justifyContent="center">
-        <YStack gap="$8" marginBottom="$10">
-          <YStack gap="$3">
-            <Text fontSize={32} fontWeight="700" color="#ffffff">
-              {t('otp.title')}
-            </Text>
-            <Text fontSize={16} color="rgba(255, 255, 255, 0.7)" lineHeight={24} numberOfLines={3} ellipsizeMode="tail">
-              {t('otp.subtitle')}{'\n'}
-              <Text fontWeight="600" color="#ffffff">
-                {phoneNumber}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <YStack flex={1} backgroundColor="#0a0a0a" paddingHorizontal="$6" paddingTop={insets.top} paddingBottom={insets.bottom} justifyContent="center">
+          <YStack gap="$8" marginBottom="$10">
+            <YStack gap="$3">
+              <Text fontSize={32} fontWeight="700" color="#ffffff">
+                {t('otp.title')}
               </Text>
-            </Text>
-          </YStack>
+              <Text fontSize={16} color="rgba(255, 255, 255, 0.7)" lineHeight={24} numberOfLines={3} ellipsizeMode="tail">
+                {t('otp.subtitle')}{'\n'}
+                <Text fontWeight="600" color="#ffffff">
+                  {phoneNumber}
+                </Text>
+              </Text>
+            </YStack>
 
-          <XStack gap="$3" justifyContent="center">
-            {otp.map((digit, index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => {
-                  inputRefs.current[index] = ref;
-                }}
-                style={[
-                  styles.otpInput,
-                  digit ? styles.otpInputFilled : null,
-                ]}
-                value={digit}
-                onChangeText={(text) => handleChange(text, index)}
-                onKeyPress={(e) => handleKeyPress(e, index)}
-                keyboardType="number-pad"
-                maxLength={1}
-                selectTextOnFocus
-              />
-            ))}
-          </XStack>
+            <XStack gap="$3" justifyContent="center">
+              {otp.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={(ref) => {
+                    inputRefs.current[index] = ref;
+                  }}
+                  style={[
+                    styles.otpInput,
+                    digit ? styles.otpInputFilled : null,
+                  ]}
+                  value={digit}
+                  onChangeText={(text) => handleChange(text, index)}
+                  onKeyPress={(e) => handleKeyPress(e, index)}
+                  keyboardType="number-pad"
+                  maxLength={1}
+                  selectTextOnFocus
+                />
+              ))}
+            </XStack>
 
-          <YStack gap="$3" alignItems="center">
-            <Text fontSize={14} color="rgba(255, 255, 255, 0.6)">
-              {timer > 0 ? t('otp.resendWait', { time: formatTime(timer) }) : t('otp.didntReceive')}
-            </Text>
-            <TouchableOpacity
-              onPress={handleResend}
-              disabled={timer > 0}
-              activeOpacity={0.7}
-              style={{ padding: 4 }}
-            >
-              <Text
-                color={timer > 0 ? "rgba(255,255,255,0.3)" : "#22c55e"}
-                fontWeight="600"
-                fontSize={15}
+            <YStack gap="$3" alignItems="center">
+              <Text fontSize={14} color="rgba(255, 255, 255, 0.6)">
+                {timer > 0 ? t('otp.resendWait', { time: formatTime(timer) }) : t('otp.didntReceive')}
+              </Text>
+              <TouchableOpacity
+                onPress={handleResend}
+                disabled={timer > 0}
+                activeOpacity={0.7}
+                style={{ padding: 4 }}
               >
-                {t('otp.resend')}
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  color={timer > 0 ? "rgba(255,255,255,0.3)" : "#22c55e"}
+                  fontWeight="600"
+                  fontSize={15}
+                >
+                  {t('otp.resend')}
+                </Text>
+              </TouchableOpacity>
+            </YStack>
           </YStack>
-        </YStack>
 
-        <Button
-          backgroundColor={isComplete ? '#22c55e' : 'rgba(255, 255, 255, 0.1)'}
-          color={isComplete ? 'white' : 'rgba(255, 255, 255, 0.5)'}
-          borderRadius={999}
-          height={56}
-          fontSize={16}
-          fontWeight="600"
-          pressStyle={{
-            backgroundColor: isComplete ? '#16a34a' : 'rgba(255, 255, 255, 0.1)',
-          }}
-          disabled={!isComplete}
-          onPress={handleVerify}
-        >
-          {t('otp.verify')}
-        </Button>
-      </YStack>
+          <Button
+            backgroundColor={isComplete ? '#22c55e' : 'rgba(255, 255, 255, 0.1)'}
+            color={isComplete ? 'white' : 'rgba(255, 255, 255, 0.5)'}
+            borderRadius={999}
+            height={56}
+            fontSize={16}
+            fontWeight="600"
+            pressStyle={{
+              backgroundColor: isComplete ? '#16a34a' : 'rgba(255, 255, 255, 0.1)',
+            }}
+            disabled={!isComplete}
+            onPress={handleVerify}
+          >
+            {t('otp.verify')}
+          </Button>
+        </YStack>
+      </TouchableWithoutFeedback>
 
       {/* Toast Notification */}
       {showToast && (

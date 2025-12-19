@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { StyleSheet, Pressable, Dimensions, ScrollView, View } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { StyleSheet, Pressable, Dimensions, ScrollView, View, Animated } from 'react-native';
 import { YStack, XStack, Text, Button } from 'tamagui';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, Calendar, User, Heart, ArrowRight, Minus, Add } from 'iconsax-react-native';
+import { ArrowLeft, Calendar, User, ArrowRight, Minus, Add } from 'iconsax-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
 
@@ -34,6 +35,29 @@ export default function SelectDate() {
   const [guestCount, setGuestCount] = useState(2);
   const [activeInput, setActiveInput] = useState<'checkIn' | 'checkOut' | null>(null);
   const [showGuestPicker, setShowGuestPicker] = useState(false);
+
+  // State for Favorites and Toast
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const toastOpacity = useRef(new Animated.Value(0)).current;
+
+  const toggleFavorite = () => {
+    if (isFavorite) {
+      setIsFavorite(false);
+    } else {
+      setIsFavorite(true);
+      showToastNotification(t('home.savedToast'));
+    }
+  };
+
+  const showToastNotification = (message: string) => {
+    setShowToast(true);
+    Animated.sequence([
+      Animated.timing(toastOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.delay(2000),
+      Animated.timing(toastOpacity, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start(() => setShowToast(false));
+  };
 
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -341,27 +365,40 @@ export default function SelectDate() {
 
             {/* Button Row */}
             <XStack gap="$3">
-              <Button
-                width={56}
-                height={56}
-                backgroundColor="transparent"
-                borderRadius={16}
-                borderWidth={1}
-                borderColor="rgba(255, 255, 255, 0.2)"
-                icon={<Heart size={24} color="#ffffff" />}
-                pressStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
-              />
+              <Pressable
+                onPress={toggleFavorite}
+                style={[
+                  styles.heartButton,
+                  isFavorite && styles.heartButtonActive
+                ]}
+              >
+                <Ionicons
+                  name={isFavorite ? "heart" : "heart-outline"}
+                  size={28}
+                  color={isFavorite ? "#22c55e" : "#ffffff"}
+                />
+              </Pressable>
               <Button
                 flex={1}
                 backgroundColor="#22c55e"
                 color="white"
                 height={56}
-                borderRadius={16}
+                borderRadius={999}
                 fontSize={16}
                 fontWeight="600"
                 pressStyle={{ backgroundColor: '#16a34a' }}
                 onPress={() => {
-                    // Navigate to next step or confirmation
+                    if (startDate && endDate) {
+                        navigation.navigate('Payment' as any, {
+                            property,
+                            startDate: startDate.toISOString(),
+                            endDate: endDate.toISOString(),
+                            guestCount
+                        });
+                    } else {
+                        // Show toast or alert that dates must be selected
+                        showToastNotification(t('selectDate.selectDatesWarning') || "Please select check-in and check-out dates");
+                    }
                 }}
               >
                 {t('selectDate.confirm')}
@@ -370,6 +407,18 @@ export default function SelectDate() {
           </YStack>
         </BlurView>
       </YStack>
+
+      {/* Toast Notification */}
+      {showToast && (
+        <Animated.View style={[styles.toastContainer, { opacity: toastOpacity, top: insets.top + 60 }]}>
+          <BlurView intensity={40} tint="dark" style={styles.toastBlur}>
+            <XStack alignItems="center" gap="$2" paddingHorizontal="$4" paddingVertical="$3">
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" />
+              <Text color="white" fontWeight="600">{t('home.savedToast')}</Text>
+            </XStack>
+          </BlurView>
+        </Animated.View>
+      )}
     </YStack>
   );
 }
@@ -383,4 +432,33 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
+  heartButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  },
+  heartButtonActive: {
+    borderColor: 'rgba(34, 197, 94, 0.3)',
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+  },
+  toastContainer: {
+    position: 'absolute',
+    alignSelf: 'center',
+    zIndex: 200,
+    borderRadius: 999,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  toastBlur: {
+    borderRadius: 999,
+  }
 });

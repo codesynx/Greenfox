@@ -222,5 +222,27 @@
     "night": "/Night",
     "confirm": "Confirm",
     "select": "Select"
+  },
+  "payment": {
+    "title": "Payment",
+    "dates": "Dates",
+    "priceDetails": "Price Details",
+    "roomFee": "Room Fee",
+    "discount": "Discount",
+    "taxes": "Taxes & Fees",
+    "total": "Total",
+    "paymentMethod": "Payment Method",
+    "payNow": "Pay Now",
+    "addNewCard": "Add New Card",
+    "policyText": "By selecting the button below you agree to the House Rules, Cancellation Regulations, Privacy and Policy. I will be fully responsible for the payment that I have made."
+  },
+  "addCard": {
+    "title": "Add Credit Card",
+    "cardName": "Card Name",
+    "cardNumber": "Credit / Debit Number",
+    "expiry": "Expired Date",
+    "cvc": "CVC",
+    "saveCard": "Securely Save this card",
+    "addBtn": "Add Card"
   }
 }

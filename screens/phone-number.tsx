@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import { StatusBar, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { YStack, Text, Button, Input } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -62,10 +62,11 @@ export default function PhoneNumberScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
     >
-      <StatusBar barStyle="light-content" />
-      <YStack flex={1} backgroundColor="#0a0a0a" paddingHorizontal="$6" paddingTop={insets.top} paddingBottom={insets.bottom} justifyContent="center">
-        <YStack gap="$6" marginBottom="$10">
-          <YStack gap="$3">
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <YStack flex={1} backgroundColor="#0a0a0a" paddingHorizontal="$6" paddingTop={insets.top} paddingBottom={insets.bottom} justifyContent="center">
+          <StatusBar barStyle="light-content" />
+          <YStack gap="$6" marginBottom="$10">
+            <YStack gap="$3">
             <Text fontSize={32} fontWeight="700" color="#ffffff">
               {t('phoneNumber.title')}
             </Text>
@@ -105,25 +106,26 @@ export default function PhoneNumberScreen() {
             <Text fontSize={12} color="rgba(255, 255, 255, 0.5)">
               {t('phoneNumber.terms')}
             </Text>
+            </YStack>
           </YStack>
-        </YStack>
 
-        <Button
-          backgroundColor={isValid ? '#22c55e' : 'rgba(255, 255, 255, 0.1)'}
-          color={isValid ? 'white' : 'rgba(255, 255, 255, 0.5)'}
-          borderRadius={999}
-          height={56}
-          fontSize={16}
-          fontWeight="600"
-          pressStyle={{
-            backgroundColor: isValid ? '#16a34a' : 'rgba(255, 255, 255, 0.1)',
-          }}
-          disabled={!isValid}
-          onPress={handleContinue}
-        >
-          {t('phoneNumber.continue')}
-        </Button>
-      </YStack>
+          <Button
+            backgroundColor={isValid ? '#22c55e' : 'rgba(255, 255, 255, 0.1)'}
+            color={isValid ? 'white' : 'rgba(255, 255, 255, 0.5)'}
+            borderRadius={999}
+            height={56}
+            fontSize={16}
+            fontWeight="600"
+            pressStyle={{
+              backgroundColor: isValid ? '#16a34a' : 'rgba(255, 255, 255, 0.1)',
+            }}
+            disabled={!isValid}
+            onPress={handleContinue}
+          >
+            {t('phoneNumber.continue')}
+          </Button>
+        </YStack>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
