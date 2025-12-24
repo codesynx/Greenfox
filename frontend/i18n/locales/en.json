@@ -1,0 +1,284 @@
+{
+  "onboarding": {
+    "slide1": {
+      "title": "Discover Kazakhstan",
+      "subtitle": "Find the perfect resort or hotel for your next getaway"
+    },
+    "slide2": {
+      "title": "Book with Ease",
+      "subtitle": "Simple and secure booking process for your convenience"
+    },
+    "slide3": {
+      "title": "Unforgettable Experiences",
+      "subtitle": "Create memories at the most beautiful destinations"
+    },
+    "skip": "Skip",
+    "next": "Next",
+    "getStarted": "Get Started"
+  },
+  "language": {
+      "select": "Select Language",
+      "en": "English",
+      "ru": "Russian",
+      "kk": "Kazakh"
+  },
+  "phoneNumber": {
+    "title": "Enter your phone number",
+    "subtitle": "We'll send you a verification code to confirm your number",
+    "label": "Phone Number",
+    "terms": "By continuing, you agree to our Terms of Service and Privacy Policy",
+    "continue": "Continue",
+    "sending": "Sending...",
+    "invalidFormat": "Please enter a valid phone number",
+    "errorSendingOtp": "Failed to send verification code",
+    "errorTitle": "Error"
+  },
+  "otp": {
+    "title": "Verify your number",
+    "subtitle": "Enter the 6-digit code sent to",
+    "didntReceive": "Didn't receive the code?",
+    "resend": "Resend Code",
+    "resendWait": "Resend code in {{time}}",
+    "codeResent": "Code sent again",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "invalidCode": "Invalid verification code",
+    "errorVerifying": "Failed to verify code",
+    "errorTitle": "Error",
+    "welcome": "Welcome!"
+  },
+  "profile": {
+    "personalInfo": "Personal Information",
+    "helpCenter": "Help Center",
+    "terms": "Terms & Conditions",
+    "privacy": "Privacy Policy",
+    "trips": "Trips",
+    "rating": "Rating",
+    "account": "Account",
+    "support": "Support",
+    "logout": "Log Out",
+    "version": "Version",
+    "user": "User"
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "fullName": "Full Name",
+    "phoneNumber": "Phone Number",
+    "email": "Email",
+    "save": "Save Changes",
+    "saving": "Saving...",
+    "success": "Success",
+    "successMessage": "Your profile has been updated successfully",
+    "errorSaving": "Failed to save profile",
+    "errorTitle": "Error",
+    "profileSaved": "Your profile has been saved"
+  },
+  "helpCenter": {
+    "title": "Help Center",
+    "stillNeedHelp": "Still need help?",
+    "chatSupport": "Chat with Support",
+    "faq1": {
+      "q": "How do I cancel my booking?",
+      "a": "You can cancel your booking from the Bookings tab. Select the trip you want to cancel and tap \"Cancel Booking\". Please note that cancellation policies vary by property."
+    },
+    "faq2": {
+      "q": "Can I pay with cryptocurrency?",
+      "a": "Currently we only support credit/debit cards and Apple/Google Pay. We are working on adding more payment methods soon."
+    },
+    "faq3": {
+      "q": "How do I contact the host?",
+      "a": "Once your booking is confirmed, you will see a \"Contact Host\" button in your booking details. You can use the in-app chat or call them directly."
+    },
+    "faq4": {
+      "q": "Is my payment information secure?",
+      "a": "Yes, we use industry-standard encryption to protect your payment details. We do not store your full credit card information."
+    }
+  },
+  "terms": {
+    "title": "Terms & Conditions",
+    "section1": {
+      "title": "1. Introduction",
+      "body": "Welcome to Greenfox. By using our app, you agree to these Terms and Conditions. Please read them carefully before making any bookings."
+    },
+    "section2": {
+      "title": "2. Bookings",
+      "body": "All bookings are subject to availability and confirmation by the property host. We act as an intermediary platform connecting guests with hosts."
+    },
+    "section3": {
+      "title": "3. Cancellations",
+      "body": "Cancellation policies vary by property. Please review the specific cancellation policy for each property before booking. Refunds are processed according to these policies."
+    },
+    "section4": {
+      "title": "4. User Responsibilities",
+      "body": "Users are responsible for maintaining the confidentiality of their account information and for all activities that occur under their account. Guests must respect property rules."
+    },
+    "section5": {
+      "title": "5. Liability",
+      "body": "Greenfox is not liable for any direct, indirect, incidental, or consequential damages arising from the use of our service or any booking made through the platform."
+    }
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "section1": {
+      "title": "1. Data Collection",
+      "body": "We collect information you provide directly to us, such as when you create or modify your account, request services, contact customer support, or otherwise communicate with us. This information may include: name, email, phone number, and payment information."
+    },
+    "section2": {
+      "title": "2. Data Usage",
+      "body": "We use the information we collect to provide, maintain, and improve our services, including to facilitate payments, send receipts, provide products and services you request (and send related information), develop new features, provide customer support to Users and Hosts, develop safety features, authenticate users, and send product updates and administrative messages."
+    },
+    "section3": {
+      "title": "3. Data Sharing",
+      "body": "We may share the information we collect with other users (e.g. Hosts) as necessary to provide the services you request. We do not sell your personal data to third parties."
+    },
+    "section4": {
+      "title": "4. Security",
+      "body": "We implement appropriate technical and organizational measures to protect your personal data against unauthorized or unlawful processing, accidental loss, destruction, or damage."
+    },
+    "section5": {
+      "title": "5. Your Rights",
+      "body": "You have the right to access, correct, or delete your personal data. You can manage your account settings within the app or contact our support team for assistance."
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "favorites": "Favorites",
+    "bookings": "Bookings",
+    "profile": "Profile"
+  },
+  "favorites": {
+    "title": "My Favorites",
+    "savedProperties": "saved",
+    "emptyTitle": "No favorites yet",
+    "emptySubtitle": "Save your favorite properties here",
+    "night": "/ night"
+  },
+  "bookings": {
+    "title": "My Bookings",
+    "count": "bookings",
+    "emptyTitle": "No bookings yet",
+    "emptySubtitle": "Book your first stay and it will appear here",
+    "status": {
+      "pending": "pending",
+      "paid": "paid",
+      "upcoming": "upcoming",
+      "completed": "completed",
+      "cancelled": "cancelled"
+    },
+    "checkIn": "Check-in",
+    "checkOut": "Check-out",
+    "totalPrice": "Total Price"
+  },
+  "home": {
+    "greeting": "Good Morning",
+    "locationLabel": "Your Location",
+    "location": {
+      "majorCities": "Major Cities"
+    },
+    "findStay": "Find your stay",
+    "searchPlaceholder": "Search destinations, hotels...",
+    "categories": {
+      "all": "All",
+      "RESORT": "Resorts",
+      "HOTEL": "Hotels",
+      "VILLA": "Villas",
+      "APARTMENT": "Apartments",
+      "resorts": "Resorts",
+      "hotels": "Hotels",
+      "villas": "Villas",
+      "apartments": "Apartments",
+      "any": "Any",
+      "hotel": "Hotel",
+      "resort": "Resort",
+      "villa": "Villa",
+      "apartment": "Apartment"
+    },
+    "specialOffers": "Special Offers",
+    "off": "OFF",
+    "seeAll": "See All",
+    "popularStays": "Popular Stays",
+    "from": "From",
+    "night": "/night",
+    "savedToast": "Saved to your favorites",
+    "noResorts": "No resorts found",
+    "noResortsSubtitle": "Try adjusting your filters or location",
+    "filters": {
+      "title": "Filters",
+      "priceRange": "Price Range",
+      "lowToHigh": "Low to High",
+      "highToLow": "High to Low",
+      "propertyType": "Property Type",
+      "showResults": "Show Results",
+      "reset": "Reset",
+      "apply": "Apply"
+    },
+    "search": {
+      "recent": "RECENT SEARCHES",
+      "placeholder": "Search..."
+    }
+  },
+  "details": {
+    "reviews": "reviews",
+    "hostedBy": "Hosted by",
+    "verifiedHost": "Verified",
+    "about": "About this place",
+    "amenities": "Amenities",
+    "photos": "Photos",
+    "night": "/ night",
+    "excludesTaxes": "Excl. taxes & fees",
+    "reserve": "Reserve",
+    "amenityList": {
+        "wifi": "Free WiFi",
+        "pool": "Pool",
+        "parking": "Parking",
+        "restaurant": "Restaurant",
+        "spa": "Spa",
+        "gym": "Gym"
+    },
+    "allAmenities": "All Amenities"
+  },
+  "promo": {
+    "title": "Special Offer",
+    "validUntil": "Valid until",
+    "discount": "OFF",
+    "aboutResort": "About Resort",
+    "viewResort": "View Resort",
+    "active": "Active",
+    "expired": "Expired",
+    "upcoming": "Upcoming",
+    "promoCode": "Promo Code"
+  },
+  "selectDate": {
+    "title": "Select Date",
+    "checkIn": "Check In",
+    "checkOut": "Check Out",
+    "guests": "Guests",
+    "guestsCount": "Guests",
+    "price": "Price:",
+    "night": "/Night",
+    "confirm": "Confirm",
+    "select": "Select"
+  },
+  "payment": {
+    "title": "Payment",
+    "dates": "Dates",
+    "priceDetails": "Price Details",
+    "roomFee": "Room Fee",
+    "discount": "Discount",
+    "taxes": "Taxes & Fees",
+    "total": "Total",
+    "paymentMethod": "Payment Method",
+    "payNow": "Pay Now",
+    "addNewCard": "Add New Card",
+    "policyText": "By selecting the button below you agree to the House Rules, Cancellation Regulations, Privacy and Policy. I will be fully responsible for the payment that I have made."
+  },
+  "addCard": {
+    "title": "Add Credit Card",
+    "cardName": "Card Name",
+    "cardNumber": "Credit / Debit Number",
+    "expiry": "Expired Date",
+    "cvc": "CVC",
+    "saveCard": "Securely Save this card",
+    "addBtn": "Add Card"
+  }
+}
