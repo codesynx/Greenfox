@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { FlatList, StyleSheet, Pressable, Dimensions, View, Image } from 'react-native';
+import { FlatList, StyleSheet, Pressable, Dimensions, View } from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import { PromoBanner } from './types';
 
 const { width } = Dimensions.get('window');
@@ -18,17 +19,8 @@ const BannerItem = ({ item }: { item: PromoBanner }) => {
   const ref = useRef<View>(null);
 
   const handlePress = () => {
-    ref.current?.measure((x, y, width, height, pageX, pageY) => {
-      (navigation as any).navigate('PromoDetails', { 
-        promo: item.data,
-        mediaSpecs: { 
-            width, 
-            height, 
-            pageX, 
-            pageY, 
-            borderRadius: 24 
-        }
-      });
+    (navigation as any).navigate('PromoDetails', { 
+      promo: item.data
     });
   };
 
@@ -41,6 +33,9 @@ const BannerItem = ({ item }: { item: PromoBanner }) => {
       <Image
         source={{ uri: item.image }}
         style={styles.bannerImage}
+        contentFit="cover"
+        transition={200}
+        cachePolicy="memory-disk"
       />
       <LinearGradient
         colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 0.6)', 'rgba(0, 0, 0, 0.9)']}

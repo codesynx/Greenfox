@@ -1,79 +1,67 @@
-import { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView, Image, Pressable, ActivityIndicator, View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { StyleSheet, FlatList, ImageBackground, Pressable, ActivityIndicator, View, Dimensions } from 'react-native';
+import Animated, { FadeInDown, Layout } from 'react-native-reanimated';
 import { YStack, XStack, Text } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { ArrowLeft } from 'iconsax-react-native';
 import { useTranslation } from 'react-i18next';
-import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { promoService, PromoResponse } from '../services/promoService';
 
-const PromoItem = ({ promo, navigation, t }: { promo: PromoResponse; navigation: any; t: any }) => {
-  const ref = useRef<View>(null);
+// Animated Component
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-  const handlePress = () => {
-    ref.current?.measure((x, y, width, height, pageX, pageY) => {
-      navigation.navigate('PromoDetails', {
-        promo,
-        mediaSpecs: {
-          width,
-          height,
-          pageX,
-          pageY,
-          borderRadius: 16,
-        },
-      });
-    });
-  };
-
+const PromoItem = ({ item, index, navigation, t }: { item: PromoResponse; index: number; navigation: any; t: any }) => {
   return (
-    <Pressable ref={ref} onPress={handlePress}>
-      <XStack borderRadius={16} overflow="hidden" style={styles.card}>
-        <Image
+    <AnimatedPressable 
+        entering={FadeInDown.delay(index * 100).springify()} 
+        layout={Layout.springify()}
+        onPress={() => navigation.navigate('PromoDetails', { promo: item })}
+        style={styles.itemContainer}
+    >
+      <View style={styles.cardContainer}>
+        <ImageBackground
           source={{
             uri:
-              promo.bannerImageUrl ||
+              item.bannerImageUrl ||
               'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=800',
           }}
           style={styles.cardImage}
-        />
-        <BlurView intensity={20} tint="dark" style={styles.blurContainer}>
-          <YStack flex={1} padding="$3" justifyContent="space-between">
-            <YStack>
-              <XStack justifyContent="space-between" alignItems="flex-start">
+          imageStyle={{ borderRadius: 20 }}
+        >
+            {/* Dark Overlay */}
+            <View style={styles.overlay} />
+            
+            <YStack flex={1} padding="$4" justifyContent="space-between">
                 <YStack
-                  backgroundColor="#22c55e"
-                  paddingHorizontal="$2"
-                  paddingVertical={2}
-                  borderRadius={4}
-                  alignSelf="flex-start"
-                  marginBottom="$1"
+                    backgroundColor="#22c55e"
+                    paddingHorizontal="$3"
+                    paddingVertical="$1"
+                    borderRadius={100}
+                    alignSelf="flex-start"
                 >
-                  <Text fontSize={10} fontWeight="700" color="white">
-                    {promo.discountPercent}% {t('home.off')}
-                  </Text>
+                    <Text fontSize={12} fontWeight="700" color="white">
+                        {item.discountPercent}% {t('home.off')}
+                    </Text>
                 </YStack>
-              </XStack>
 
-              <Text fontSize={16} fontWeight="700" color="#ffffff" numberOfLines={2}>
-                {promo.title || promo.resortName}
-              </Text>
-              <Text fontSize={13} color="rgba(255, 255, 255, 0.7)" marginTop="$1" numberOfLines={1}>
-                {promo.resortName}
-              </Text>
+                <YStack gap="$1">
+                    <Text fontSize={20} fontWeight="700" color="#ffffff" numberOfLines={2} lineHeight={26}>
+                        {item.title || item.resortName}
+                    </Text>
+                    
+                    <XStack alignItems="center" gap="$1.5">
+                        <Ionicons name="location-sharp" size={14} color="rgba(255,255,255,0.8)" />
+                        <Text fontSize={14} color="rgba(255, 255, 255, 0.9)" numberOfLines={1}>
+                            {item.resortName}
+                        </Text>
+                    </XStack>
+                </YStack>
             </YStack>
-
-            <XStack alignItems="center" gap="$1" marginTop="$2">
-              <Ionicons name="calendar-outline" size={12} color="rgba(255,255,255,0.5)" />
-              <Text fontSize={12} color="rgba(255, 255, 255, 0.5)">
-                Limited time offer
-              </Text>
-            </XStack>
-          </YStack>
-        </BlurView>
-      </XStack>
-    </Pressable>
+        </ImageBackground>
+      </View>
+    </AnimatedPressable>
   );
 };
 
@@ -102,15 +90,34 @@ export default function AllPromosScreen() {
   };
 
   return (
-    <YStack flex={1} backgroundColor="#0a0a0a">
-      <YStack paddingTop={insets.top + 10} paddingHorizontal="$4" paddingBottom="$4" gap="$4">
-        <Pressable onPress={() => navigation.goBack()}>
-          <ArrowLeft size={28} color="#ffffff" />
-        </Pressable>
-        <Text fontSize={28} fontWeight="700" color="#ffffff">
-          {t('home.specialOffers') || 'All Promos'}
+    <View style={styles.container}>
+      {/* Modal Navbar */}
+      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+        <View style={styles.headerLeft} />
+        
+        <Text 
+            fontSize={17} 
+            fontWeight="600" 
+            color="#ffffff" 
+            textAlign="center"
+            numberOfLines={1}
+            style={{ flex: 1 }}
+        >
+            {t('home.specialOffers')}
         </Text>
-      </YStack>
+
+        <View style={styles.headerRight}>
+            <Pressable 
+                onPress={() => navigation.goBack()}
+                hitSlop={15}
+                style={({pressed}) => ({ opacity: pressed ? 0.7 : 1 })}
+            >
+                <View style={styles.closeButton}>
+                    <Ionicons name="close" size={20} color="#fff" />
+                </View>
+            </Pressable>
+        </View>
+      </View>
 
       {isLoading ? (
         <YStack flex={1} justifyContent="center" alignItems="center">
@@ -120,40 +127,77 @@ export default function AllPromosScreen() {
         <YStack flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$6">
           <Ionicons name="pricetag-outline" size={48} color="rgba(255,255,255,0.3)" />
           <Text fontSize={18} fontWeight="600" color="#ffffff" textAlign="center" marginTop="$4">
-            No active promotions
+            {t('home.noResorts')}
           </Text>
         </YStack>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
-          <YStack paddingHorizontal="$4" gap="$4">
-            {promos.map((promo) => (
-              <PromoItem 
-                key={promo.id} 
-                promo={promo} 
+        <FlatList
+          data={promos}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index }) => (
+            <PromoItem 
+                item={item} 
+                index={index}
                 navigation={navigation}
                 t={t}
-              />
-            ))}
-          </YStack>
-        </ScrollView>
+            />
+          )}
+          contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20 }}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={{ height: 20 }} />}
+        />
       )}
-    </YStack>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    height: 120,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  container: {
+    flex: 1,
+    backgroundColor: '#0a0a0a',
   },
-  cardImage: {
-    width: 120,
-    height: '100%',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    backgroundColor: '#0a0a0a',
+    zIndex: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)',
+  },
+  headerLeft: {
+    width: 40,
+  },
+  headerRight: {
+    width: 40,
+    alignItems: 'flex-end',
+  },
+  closeButton: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  itemContainer: {
+    width: '100%',
+  },
+  cardContainer: {
+    height: 200,
+    borderRadius: 20,
+    overflow: 'hidden',
     backgroundColor: '#1a1a1a',
   },
-  blurContainer: {
-    flex: 1,
+  cardImage: {
+    width: '100%',
+    height: '100%',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    borderRadius: 20,
   },
 });

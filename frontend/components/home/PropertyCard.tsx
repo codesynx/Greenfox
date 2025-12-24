@@ -1,9 +1,10 @@
-import { Image, StyleSheet, Pressable } from 'react-native';
+import { StyleSheet, Pressable } from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
 import { BlurView } from 'expo-blur';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
+import { Image } from 'expo-image';
 import { Property } from './types';
 
 interface PropertyCardProps {
@@ -19,7 +20,13 @@ export const PropertyCard = ({ property, isFavorite, onPress, onFavoritePress }:
   return (
     <Pressable onPress={onPress} style={styles.cardPressable}>
       <YStack style={styles.propertyCard}>
-        <Image source={{ uri: property.image }} style={styles.cardImage} />
+        <Image
+          source={{ uri: property.image }}
+          style={styles.cardImage}
+          contentFit="cover"
+          transition={200}
+          cachePolicy="memory-disk"
+        />
         
         {/* Favorite Button Overlay */}
         <Pressable 

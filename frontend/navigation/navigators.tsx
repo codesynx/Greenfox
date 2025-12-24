@@ -124,16 +124,19 @@ export function MainNavigator() {
          component={PromoDetailsScreen}
          options={{
             headerShown: false,
-            presentation: 'transparentModal',
-            cardStyle: { backgroundColor: 'transparent' },
-            cardStyleInterpolator: () => ({
-                cardStyle: {
-                    opacity: 1
-                }
-            })
+            presentation: 'modal',
+            ...TransitionPresets.ModalSlideFromBottomIOS,
          }}
        />
-       <MainStack.Screen name="AllPromos" component={AllPromosScreen} />
+       <MainStack.Screen 
+         name="AllPromos" 
+         component={AllPromosScreen}
+         options={{
+            headerShown: false,
+            presentation: 'modal',
+            ...TransitionPresets.ModalSlideFromBottomIOS,
+         }}
+       />
     </MainStack.Navigator>
   );
 }
@@ -147,7 +150,7 @@ declare global {
       OTP: undefined;
       // Main
       MainTabs: undefined;
-      Details: undefined;
+      Details: { propertyId: string };
       SelectDate: {
         property: {
           id: string;
