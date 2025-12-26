@@ -291,7 +291,13 @@ export default function HomeScreen() {
                     key={property.id}
                     property={property}
                     isFavorite={isFavorite(property.id)}
-                    onPress={() => (navigation as any).navigate('Details', { propertyId: property.id })}
+                    onPress={() => (navigation as any).navigate('Details', { 
+                      propertyId: property.id,
+                      imageUri: property.image,
+                      price: property.price,
+                      name: property.name,
+                      location: property.location,
+                    })}
                     onFavoritePress={() => handleToggleFavorite(property.id)}
                   />
                 ))

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Pressable, StyleSheet, ImageBackground, View, Dimensions, Image, Alert } from 'react-native';
+import { Pressable, StyleSheet, ImageBackground, View, Dimensions, Alert } from 'react-native';
+import { Image } from 'expo-image';
 import { YStack, XStack, Text, Spinner } from 'tamagui';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -37,12 +38,20 @@ const supportItems: MenuItem[] = [
   { id: '7', titleKey: 'profile.privacy', icon: 'shield-checkmark-outline', route: 'Privacy' },
 ];
 
-const MenuItem = ({ item }: { item: MenuItem }) => {
+const MenuItem = ({ item, avatarUri }: { item: MenuItem; avatarUri?: string | null }) => {
   const navigation = useNavigation();
   const { t } = useTranslation();
-  
+
   return (
-    <Pressable onPress={() => item.route && (navigation as any).navigate(item.route)}>
+    <Pressable onPress={() => {
+      if (item.route) {
+        if (item.route === 'EditProfile') {
+          (navigation as any).navigate(item.route, { avatarUri });
+        } else {
+          (navigation as any).navigate(item.route);
+        }
+      }
+    }}>
       <BlurView intensity={20} tint="light" style={styles.menuItemBlur}>
         <XStack
           paddingVertical="$4"
@@ -78,6 +87,9 @@ export default function ProfileScreen() {
   const { user, logout, refreshProfile, optimisticAvatar, setOptimisticAvatar } = useAuth();
 
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  // Current avatar URI for navigation
+  const currentAvatarUri = optimisticAvatar || user?.avatarUrl;
 
   const handlePickImage = async () => {
     try {
@@ -212,6 +224,9 @@ export default function ProfileScreen() {
                       height: 88,
                       borderRadius: 44,
                     }}
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
                   />
                 ) : (
                   <YStack
@@ -230,7 +245,7 @@ export default function ProfileScreen() {
 
             <Pressable
               style={styles.editBadge}
-              onPress={() => (navigation as any).navigate('EditProfile')}
+              onPress={() => (navigation as any).navigate('EditProfile', { avatarUri: currentAvatarUri })}
             >
               <BlurView intensity={20} tint="light" style={StyleSheet.absoluteFill} />
               <Ionicons name="pencil" size={14} color="#fff" />
@@ -253,7 +268,7 @@ export default function ProfileScreen() {
             </Text>
             <YStack gap="$3">
               {accountItems.map((item) => (
-                <MenuItem key={item.id} item={item} />
+                <MenuItem key={item.id} item={item} avatarUri={currentAvatarUri} />
               ))}
             </YStack>
           </YStack>

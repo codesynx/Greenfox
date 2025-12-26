@@ -159,12 +159,19 @@
     "emptyTitle": "No bookings yet",
     "emptySubtitle": "Book your first stay and it will appear here",
     "status": {
-      "pending": "pending",
-      "paid": "paid",
-      "upcoming": "upcoming",
-      "completed": "completed",
-      "cancelled": "cancelled"
+      "pending": "Pending",
+      "paid": "Paid",
+      "confirmed": "Confirmed",
+      "rejected": "Rejected",
+      "cancellation_pending": "Cancellation Under Review",
+      "upcoming": "Upcoming",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
     },
+    "cancelBooking": "Cancel Booking",
+    "cancellationReason": "Reason for cancellation",
+    "cancelSubmit": "Submit Request",
+    "cancelUnderReview": "Your cancellation request is under review",
     "checkIn": "Check-in",
     "checkOut": "Check-out",
     "totalPrice": "Total Price"
@@ -214,7 +221,10 @@
     },
     "search": {
       "recent": "RECENT SEARCHES",
-      "placeholder": "Search..."
+      "placeholder": "Search...",
+      "found": "Found",
+      "results": "Results",
+      "foundCount": "Found {{count}} results"
     }
   },
   "details": {
@@ -257,7 +267,28 @@
     "price": "Price:",
     "night": "/Night",
     "confirm": "Confirm",
-    "select": "Select"
+    "next": "Next",
+    "select": "Select",
+    "adults": "Adults",
+    "adultsSubtitle": "Age 13+",
+    "children": "Children",
+    "childrenSubtitle": "Age 0-12"
+  },
+  "guestInfo": {
+    "title": "Guest Details",
+    "fullName": "Full Name",
+    "idType": "ID Type",
+    "iin": "IIN",
+    "passport": "Passport",
+    "iinPlaceholder": "Enter IIN (12 digits)",
+    "passportPlaceholder": "Enter Passport Number",
+    "payBook": "Go to Payment",
+    "totalPrice": "Total Price",
+    "errors": {
+      "nameRequired": "Full Name is required",
+      "iinLength": "IIN must be exactly 12 digits",
+      "passportRequired": "Passport Number is required"
+    }
   },
   "payment": {
     "title": "Payment",
@@ -265,6 +296,8 @@
     "priceDetails": "Price Details",
     "roomFee": "Room Fee",
     "discount": "Discount",
+    "discountAmount": "Discount",
+    "priceWithDiscount": "Price with discount",
     "taxes": "Taxes & Fees",
     "total": "Total",
     "paymentMethod": "Payment Method",
@@ -280,5 +313,21 @@
     "cvc": "CVC",
     "saveCard": "Securely Save this card",
     "addBtn": "Add Card"
+  },
+  "bookingSuccess": {
+    "title": "Payment Confirmed",
+    "message": "Your payment has been successfully processed and your booking is confirmed.",
+    "homeBtn": "Go To Home"
+  },
+  "notification": {
+    "booking": {
+      "created": "Payment successful! Your booking is under review.",
+      "confirmed": "Your booking for {{hotelName}} has been confirmed! We are waiting for you.",
+      "rejected": "Your booking for {{hotelName}} was rejected. Please contact support.",
+      "cancellation_under_review": "Your cancellation request is under review.",
+      "refund_processed": "Your booking was cancelled successfully.",
+      "completed": "Thank you for staying with us!",
+      "cancelled": "Your booking has been cancelled."
+    }
   }
 }

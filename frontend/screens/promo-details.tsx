@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, Pressable, Dimensions, StatusBar, Platform } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
   useSharedValue,
   interpolate,
@@ -26,6 +27,8 @@ import { useFavorites } from '../contexts/FavoritesContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMG_HEIGHT = 400;
+
+const AnimatedImage = Animated.createAnimatedComponent(Image);
 
 export default function PromoDetailsScreen() {
   const { t, i18n } = useTranslation();
@@ -121,10 +124,12 @@ export default function PromoDetailsScreen() {
       >
         {/* Parallax Image Header */}
         <Animated.View style={[styles.imageContainer, animatedImageStyle]}>
-          <Animated.Image
+          <AnimatedImage
             source={{ uri: bannerImage }}
             style={styles.image}
-            resizeMode="cover"
+            contentFit="cover"
+            transition={200}
+            cachePolicy="memory-disk"
           />
           <LinearGradient
             colors={['transparent', 'rgba(10,10,10,0.8)', '#0a0a0a']}

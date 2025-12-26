@@ -85,6 +85,8 @@ export interface GetResortsParams {
 }
 
 class ResortService {
+  private cache: Map<string, ResortDetails> = new Map();
+
   async getResorts(params: GetResortsParams = {}): Promise<PageResponse<ResortListItem>> {
     const { page = 0, size = 20, ...otherParams } = params;
 
@@ -102,8 +104,14 @@ class ResortService {
   }
 
   async getResortById(id: string): Promise<ResortDetails> {
+    if (this.cache.has(id)) {
+      return this.cache.get(id)!;
+    }
+
     const response = await apiClient.get<ApiResponse<ResortDetails>>(`/resorts/${id}`);
-    return response.data.data;
+    const data = response.data.data;
+    this.cache.set(id, data);
+    return data;
   }
 
   async getCities(): Promise<string[]> {

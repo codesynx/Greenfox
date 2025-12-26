@@ -30,10 +30,14 @@ export default function SelectDate() {
   // Get property from params (mock if undefined for safety)
   const property = (route.params as any)?.property || { price: 150 };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [guestCount, setGuestCount] = useState(2);
+  const [adults, setAdults] = useState(2);
+  const [children, setChildren] = useState(0);
   const [activeInput, setActiveInput] = useState<'checkIn' | 'checkOut' | null>(null);
   const [showGuestPicker, setShowGuestPicker] = useState(false);
 
@@ -204,7 +208,9 @@ export default function SelectDate() {
                 <XStack flex={1} justifyContent="space-between" alignItems="center">
                     <YStack alignItems="flex-start">
                     <Text fontSize={10} color="rgba(255, 255, 255, 0.5)">{t('selectDate.guests')}</Text>
-                    <Text fontSize={14} color="#ffffff" fontWeight="600">{guestCount} {t('selectDate.guestsCount')}</Text>
+                    <Text fontSize={14} color="#ffffff" fontWeight="600">
+                        {adults} {t('selectDate.adults')}, {children} {t('selectDate.children')}
+                    </Text>
                     </YStack>
                 </XStack>
                 </Button>
@@ -214,26 +220,58 @@ export default function SelectDate() {
                     <YStack 
                         marginTop="$2" 
                         padding="$4" 
-                        backgroundColor="rgba(255,255,255,0.05)" 
+                        backgroundColor="rgba(20,20,20,0.9)" 
                         borderRadius={16} 
                         borderWidth={1} 
                         borderColor="rgba(255,255,255,0.1)"
-                        alignItems="center"
+                        gap="$4"
                     >
-                        <XStack alignItems="center" gap="$4">
-                            <Pressable 
-                                onPress={() => setGuestCount(Math.max(1, guestCount - 1))}
-                                style={{ padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 }}
-                            >
-                                <Minus size={20} color="white" />
-                            </Pressable>
-                            <Text fontSize={20} fontWeight="600" color="white" minWidth={40} textAlign="center">{guestCount}</Text>
-                            <Pressable 
-                                onPress={() => setGuestCount(guestCount + 1)}
-                                style={{ padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 }}
-                            >
-                                <Add size={20} color="white" />
-                            </Pressable>
+                        {/* Adults Row */}
+                        <XStack justifyContent="space-between" alignItems="center">
+                            <YStack>
+                                <Text color="white" fontWeight="600">{t('selectDate.adults')}</Text>
+                                <Text color="rgba(255,255,255,0.5)" fontSize={12}>{t('selectDate.adultsSubtitle')}</Text>
+                            </YStack>
+                            <XStack alignItems="center" gap="$3">
+                                <Pressable 
+                                    onPress={() => setAdults(Math.max(1, adults - 1))}
+                                    style={{ padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 }}
+                                >
+                                    <Minus size={20} color="white" />
+                                </Pressable>
+                                <Text fontSize={16} fontWeight="600" color="white" minWidth={30} textAlign="center">{adults}</Text>
+                                <Pressable 
+                                    onPress={() => setAdults(adults + 1)}
+                                    style={{ padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 }}
+                                >
+                                    <Add size={20} color="white" />
+                                </Pressable>
+                            </XStack>
+                        </XStack>
+
+                        <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.1)' }} />
+
+                        {/* Children Row */}
+                        <XStack justifyContent="space-between" alignItems="center">
+                            <YStack>
+                                <Text color="white" fontWeight="600">{t('selectDate.children')}</Text>
+                                <Text color="rgba(255,255,255,0.5)" fontSize={12}>{t('selectDate.childrenSubtitle')}</Text>
+                            </YStack>
+                            <XStack alignItems="center" gap="$3">
+                                <Pressable 
+                                    onPress={() => setChildren(Math.max(0, children - 1))}
+                                    style={{ padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 }}
+                                >
+                                    <Minus size={20} color="white" />
+                                </Pressable>
+                                <Text fontSize={16} fontWeight="600" color="white" minWidth={30} textAlign="center">{children}</Text>
+                                <Pressable 
+                                    onPress={() => setChildren(children + 1)}
+                                    style={{ padding: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20 }}
+                                >
+                                    <Add size={20} color="white" />
+                                </Pressable>
+                            </XStack>
                         </XStack>
                     </YStack>
                 )}
@@ -276,6 +314,8 @@ export default function SelectDate() {
                 ))}
                 
                 {CURRENT_MONTH_DAYS.map((day) => {
+                  const date = new Date(year, month, day);
+                  const isPast = date < today;
                   const status = isSelected(day);
                   const isStart = status === 'start';
                   const isEnd = status === 'end';
@@ -292,14 +332,16 @@ export default function SelectDate() {
                   return (
                     <Pressable
                       key={day}
-                      onPress={() => handleDayPress(day)}
+                      onPress={() => !isPast && handleDayPress(day)}
                       style={{
                         width: '14.28%',
                         height: 48,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        position: 'relative'
+                        position: 'relative',
+                        opacity: isPast ? 0.3 : 1
                       }}
+                      disabled={isPast}
                     >
                       {/* Range Strip (Behind Circles) */}
                       {showRange && (
@@ -392,11 +434,20 @@ export default function SelectDate() {
                 pressStyle={{ backgroundColor: '#16a34a' }}
                 onPress={() => {
                     if (startDate && endDate) {
-                        navigation.navigate('Payment' as any, {
+                        // Format dates in local timezone (YYYY-MM-DD) to avoid UTC conversion
+                        const formatLocalDate = (date: Date) => {
+                            const year = date.getFullYear();
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const day = String(date.getDate()).padStart(2, '0');
+                            return `${year}-${month}-${day}`;
+                        };
+
+                        navigation.navigate('GuestInfo' as any, {
                             property,
-                            startDate: startDate.toISOString(),
-                            endDate: endDate.toISOString(),
-                            guestCount
+                            startDate: formatLocalDate(startDate),
+                            endDate: formatLocalDate(endDate),
+                            adults,
+                            children
                         });
                     } else {
                         // Show toast or alert that dates must be selected
@@ -404,7 +455,7 @@ export default function SelectDate() {
                     }
                 }}
               >
-                {t('selectDate.confirm')}
+                {t('selectDate.next')}
               </Button>
             </XStack>
           </YStack>

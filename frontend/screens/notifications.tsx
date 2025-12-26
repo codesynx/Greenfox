@@ -1,86 +1,89 @@
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Pressable, FlatList, View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { ScrollView, StyleSheet, Pressable, FlatList, View, ActivityIndicator } from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
+import { MotiView } from 'moti';
+import { notificationService, Notification } from '../services/notificationService';
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  read: boolean;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    title: 'Booking Confirmed',
-    message: 'Your stay at Alakol Lake Resort has been confirmed for July 15-20.',
-    time: '2 hours ago',
-    type: 'success',
-    read: false,
-  },
-  {
-    id: '2',
-    title: 'Special Offer',
-    message: 'Get 20% off your next booking in Almaty!',
-    time: '5 hours ago',
-    type: 'info',
-    read: false,
-  },
-  {
-    id: '3',
-    title: 'Check-in Reminder',
-    message: 'Don\'t forget to check in for your upcoming trip tomorrow.',
-    time: '1 day ago',
-    type: 'warning',
-    read: true,
-  },
-  {
-    id: '4',
-    title: 'Payment Successful',
-    message: 'Your payment for Caspian Sea Villa was successful.',
-    time: '2 days ago',
-    type: 'success',
-    read: true,
-  },
-];
+const SkeletonItem = ({ 
+  width: w, 
+  height: h, 
+  borderRadius = 4, 
+  style 
+}: { 
+  width?: number | string; 
+  height?: number | string; 
+  borderRadius?: number;
+  style?: any; 
+}) => (
+  <MotiView
+    from={{ opacity: 0.3 }}
+    animate={{ opacity: 0.6 }}
+    transition={{
+      type: 'timing',
+      duration: 1000,
+      loop: true,
+    }}
+    style={[{
+      width: w,
+      height: h,
+      backgroundColor: '#2C2C2C',
+      borderRadius,
+    }, style]}
+  />
+);
 
 export default function NotificationsScreen() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadNotifications = async () => {
+    try {
+      const response = await notificationService.getNotifications();
+      setNotifications(response.content);
+      // Mark all as read when opening
+      notificationService.markAllAsRead();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadNotifications();
+  };
 
   const getIcon = (type: string) => {
-    switch (type) {
-      case 'success': return 'checkmark-circle';
-      case 'warning': return 'alert-circle';
-      case 'error': return 'close-circle';
-      default: return 'information-circle';
-    }
+    if (type.includes('CONFIRMED') || type.includes('PAID') || type.includes('SUCCESS')) return 'checkmark-circle';
+    if (type.includes('WARNING') || type.includes('REVIEW') || type.includes('PENDING')) return 'alert-circle';
+    if (type.includes('ERROR') || type.includes('REJECTED') || type.includes('CANCELLED')) return 'close-circle';
+    return 'information-circle';
   };
 
   const getColor = (type: string) => {
-    switch (type) {
-      case 'success': return '#22c55e';
-      case 'warning': return '#fbbf24';
-      case 'error': return '#ef4444';
-      default: return '#3b82f6';
-    }
-  };
-
-  const markAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    if (type.includes('CONFIRMED') || type.includes('PAID') || type.includes('SUCCESS')) return '#22c55e';
+    if (type.includes('WARNING') || type.includes('REVIEW') || type.includes('PENDING')) return '#fbbf24';
+    if (type.includes('ERROR') || type.includes('REJECTED') || type.includes('CANCELLED')) return '#ef4444';
+    return '#3b82f6';
   };
 
   const renderItem = ({ item }: { item: Notification }) => (
-    <Pressable onPress={() => markAsRead(item.id)}>
+    <Pressable>
       <BlurView intensity={10} tint="light" style={[styles.notificationCard, !item.read && styles.unreadBorder]}>
         <XStack padding="$4" gap="$3">
           <YStack 
@@ -91,7 +94,7 @@ export default function NotificationsScreen() {
             alignItems="center" 
             justifyContent="center"
           >
-            <Ionicons name={getIcon(item.type)} size={24} color={getColor(item.type)} />
+            <Ionicons name={getIcon(item.type) as any} size={24} color={getColor(item.type)} />
           </YStack>
           
           <YStack flex={1} gap="$1">
@@ -100,10 +103,12 @@ export default function NotificationsScreen() {
               {!item.read && <YStack width={8} height={8} borderRadius={4} backgroundColor="#22c55e" />}
             </XStack>
             <Text fontSize={14} color="rgba(255,255,255,0.7)" lineHeight={20}>
-              {item.message}
+              {item.message.startsWith('notification.') 
+                ? t(item.message, { hotelName: item.metadata?.resortName || item.title || 'Resort' }) 
+                : item.message}
             </Text>
             <Text fontSize={12} color="rgba(255,255,255,0.4)" marginTop="$1">
-              {item.time}
+              {new Date(item.createdAt).toLocaleDateString()} {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </Text>
           </YStack>
         </XStack>
@@ -123,18 +128,42 @@ export default function NotificationsScreen() {
         <View style={{ width: 40 }} />
       </XStack>
 
-      <FlatList
-        data={notifications}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ padding: 16, gap: 16 }}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <YStack alignItems="center" marginTop="$10">
-            <Text color="rgba(255,255,255,0.5)">{t('notifications.empty', 'No notifications')}</Text>
-          </YStack>
-        }
-      />
+      {isLoading && !refreshing ? (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16, gap: 16 }}>
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <BlurView key={i} intensity={10} tint="light" style={styles.notificationCard}>
+              <XStack padding="$4" gap="$3">
+                {/* Left Icon Skeleton */}
+                <SkeletonItem width={40} height={40} borderRadius={20} />
+                
+                {/* Right Column Skeleton */}
+                <YStack flex={1} gap="$2">
+                  <XStack justifyContent="space-between">
+                    <SkeletonItem width="80%" height={20} borderRadius={4} />
+                  </XStack>
+                  <SkeletonItem width="60%" height={16} borderRadius={4} />
+                  <SkeletonItem width="20%" height={12} borderRadius={4} />
+                </YStack>
+              </XStack>
+            </BlurView>
+          ))}
+        </ScrollView>
+      ) : (
+        <FlatList
+          data={notifications}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{ padding: 16, gap: 16 }}
+          showsVerticalScrollIndicator={false}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListEmptyComponent={
+            <YStack alignItems="center" marginTop="$10">
+              <Text color="rgba(255,255,255,0.5)">{t('notifications.empty', 'No notifications')}</Text>
+            </YStack>
+          }
+        />
+      )}
     </YStack>
   );
 }

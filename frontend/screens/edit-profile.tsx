@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Pressable, KeyboardAvoidingView, Platform, ScrollView, View, Alert, Animated, Image } from 'react-native';
+import { StyleSheet, Pressable, KeyboardAvoidingView, Platform, ScrollView, View, Alert, Animated } from 'react-native';
+import { Image } from 'expo-image';
 import { YStack, XStack, Text, Input, Button, Spinner } from 'tamagui';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BlurView } from 'expo-blur';
@@ -11,11 +12,17 @@ import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
 
+type EditProfileRouteProp = RouteProp<{ EditProfile: { avatarUri?: string | null } }, 'EditProfile'>;
+
 export default function EditProfileScreen() {
   const navigation = useNavigation();
+  const route = useRoute<EditProfileRouteProp>();
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { user, refreshProfile, optimisticAvatar, setOptimisticAvatar } = useAuth();
+
+  // Instant avatar rendering from navigation params
+  const [instantAvatar] = useState(route.params?.avatarUri || null);
 
   const [name, setName] = useState('');
   const [phone] = useState(user?.phoneNumber || '');
@@ -164,14 +171,17 @@ export default function EditProfileScreen() {
                 alignItems="center"
                 justifyContent="center"
               >
-                {(optimisticAvatar || user?.avatarUrl) ? (
+                {(optimisticAvatar || instantAvatar || user?.avatarUrl) ? (
                   <Image
-                    source={{ uri: optimisticAvatar || user?.avatarUrl! }}
+                    source={{ uri: optimisticAvatar || instantAvatar || user?.avatarUrl! }}
                     style={{
                       width: 88,
                       height: 88,
                       borderRadius: 44,
                     }}
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
                   />
                 ) : (
                   <YStack

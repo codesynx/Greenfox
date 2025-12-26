@@ -1,22 +1,68 @@
 import { useState, useEffect } from 'react';
-import { ScrollView, Image, StyleSheet, Pressable, ActivityIndicator } from 'react-native';
+import { 
+  ScrollView, 
+  Image, 
+  StyleSheet, 
+  Pressable, 
+  ActivityIndicator, 
+  Modal, 
+  TextInput, 
+  Alert, 
+  KeyboardAvoidingView, 
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  TouchableOpacity
+} from 'react-native';
 import { YStack, XStack, Text } from 'tamagui';
 import { useNavigation } from '@react-navigation/native';
 import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { MotiView } from 'moti';
 import { bookingService, BookingResponse } from '../services/bookingService';
+import { Button } from '../components/Button';
+
+const SkeletonItem = ({ 
+  width: w, 
+  height: h, 
+  borderRadius = 4, 
+  style 
+}: { 
+  width?: number | string; 
+  height?: number | string; 
+  borderRadius?: number;
+  style?: any; 
+}) => (
+  <MotiView
+    from={{ opacity: 0.3 }}
+    animate={{ opacity: 0.6 }}
+    transition={{
+      type: 'timing',
+      duration: 1000,
+      loop: true,
+    }}
+    style={[{
+      width: w,
+      height: h,
+      backgroundColor: '#2C2C2C',
+      borderRadius,
+    }, style]}
+  />
+);
 
 const getStatusColor = (status: BookingResponse['status']) => {
   switch (status) {
     case 'PENDING':
     case 'PAID_WAITING':
+    case 'CANCELLATION_PENDING':
       return '#fbbf24';
     case 'CONFIRMED':
       return '#22c55e';
     case 'COMPLETED':
       return 'rgba(255, 255, 255, 0.6)';
     case 'CANCELLED':
+    case 'REJECTED':
       return '#ef4444';
     default:
       return 'rgba(255, 255, 255, 0.6)';
@@ -27,12 +73,14 @@ const getStatusBgColor = (status: BookingResponse['status']) => {
   switch (status) {
     case 'PENDING':
     case 'PAID_WAITING':
+    case 'CANCELLATION_PENDING':
       return 'rgba(251, 191, 36, 0.2)';
     case 'CONFIRMED':
       return 'rgba(34, 197, 94, 0.2)';
     case 'COMPLETED':
       return 'rgba(255, 255, 255, 0.1)';
     case 'CANCELLED':
+    case 'REJECTED':
       return 'rgba(239, 68, 68, 0.2)';
     default:
       return 'rgba(255, 255, 255, 0.1)';
@@ -46,13 +94,17 @@ const getStatusLabel = (status: BookingResponse['status']) => {
     case 'PAID_WAITING':
       return 'paid';
     case 'CONFIRMED':
-      return 'upcoming';
+      return 'confirmed';
+    case 'REJECTED':
+      return 'rejected';
+    case 'CANCELLATION_PENDING':
+      return 'cancellation_pending';
     case 'COMPLETED':
       return 'completed';
     case 'CANCELLED':
       return 'cancelled';
     default:
-      return status.toLowerCase();
+      return (status as string).toLowerCase();
   }
 };
 
@@ -63,6 +115,10 @@ export default function BookingsScreen() {
 
   const [bookings, setBookings] = useState<BookingResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [cancellationReason, setCancellationReason] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     loadBookings();
@@ -75,17 +131,34 @@ export default function BookingsScreen() {
       setBookings(response.content);
     } catch (err: any) {
       console.error('Error loading bookings:', err);
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status,
-      });
       // If unauthorized, just show empty state
       if (err.response?.status === 401) {
         setBookings([]);
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCancelPress = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setCancellationReason('');
+    setCancelModalVisible(true);
+  };
+
+  const submitCancellation = async () => {
+    if (!selectedBookingId || !cancellationReason.trim()) return;
+    
+    try {
+      setIsSubmitting(true);
+      await bookingService.cancelBooking(selectedBookingId, cancellationReason);
+      setCancelModalVisible(false);
+      Alert.alert(t('bookings.cancellationReason'), t('bookings.cancelUnderReview'));
+      loadBookings();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to submit cancellation request');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -103,9 +176,51 @@ export default function BookingsScreen() {
       </YStack>
 
       {isLoading ? (
-        <YStack flex={1} justifyContent="center" alignItems="center">
-          <ActivityIndicator size="large" color="#22c55e" />
-        </YStack>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <YStack paddingHorizontal="$4" paddingBottom="$20" gap="$4">
+            {[1, 2, 3].map((i) => (
+              <YStack
+                key={i}
+                borderRadius={16}
+                overflow="hidden"
+                backgroundColor="#1a1a1a"
+                borderWidth={1}
+                borderColor="rgba(255, 255, 255, 0.1)"
+              >
+                {/* Image Area */}
+                <SkeletonItem width="100%" height={180} borderRadius={0} />
+                
+                {/* Status Badge Placeholder */}
+                <YStack position="absolute" top={16} right={16}>
+                   <SkeletonItem width={80} height={24} borderRadius={12} />
+                </YStack>
+
+                <YStack padding="$4" gap="$3">
+                  {/* Title Row */}
+                  <XStack justifyContent="space-between" alignItems="center">
+                    <SkeletonItem width="60%" height={24} borderRadius={6} />
+                  </XStack>
+
+                  {/* Details Row */}
+                  <XStack justifyContent="space-between">
+                    <SkeletonItem width="30%" height={16} borderRadius={4} />
+                    <SkeletonItem width="30%" height={16} borderRadius={4} />
+                  </XStack>
+
+                  <YStack height={1} backgroundColor="rgba(255,255,255,0.1)" marginVertical="$2" />
+
+                  {/* Price */}
+                  <XStack justifyContent="space-between" alignItems="center">
+                    <YStack gap="$1">
+                        <SkeletonItem width={60} height={12} borderRadius={4} />
+                        <SkeletonItem width={100} height={20} borderRadius={6} />
+                    </YStack>
+                  </XStack>
+                </YStack>
+              </YStack>
+            ))}
+          </YStack>
+        </ScrollView>
       ) : bookings.length === 0 ? (
         <YStack flex={1} justifyContent="center" alignItems="center" paddingHorizontal="$6">
           <Text fontSize={48} marginBottom="$4">
@@ -125,7 +240,7 @@ export default function BookingsScreen() {
               const image = booking.resortPhotoUrl || 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800';
 
               return (
-                <Pressable key={booking.id} onPress={() => (navigation as any).navigate('Details')}>
+                <Pressable key={booking.id} onPress={() => (navigation as any).navigate('Details', { propertyId: booking.resortId })}>
                   <YStack
                     marginBottom="$4"
                     borderRadius={16}
@@ -195,12 +310,25 @@ export default function BookingsScreen() {
                           justifyContent="space-between"
                           alignItems="center"
                         >
-                          <Text fontSize={12} color="rgba(255, 255, 255, 0.5)">
-                            {t('bookings.totalPrice')}
-                          </Text>
-                          <Text fontSize={20} fontWeight="700" color="#22c55e">
-                            ₸{booking.totalPrice.toLocaleString()}
-                          </Text>
+                          <YStack>
+                            <Text fontSize={12} color="rgba(255, 255, 255, 0.5)">
+                              {t('bookings.totalPrice')}
+                            </Text>
+                            <Text fontSize={20} fontWeight="700" color="#22c55e">
+                              ₸{booking.totalPrice.toLocaleString()}
+                            </Text>
+                          </YStack>
+                          
+                          {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
+                            <TouchableOpacity 
+                              onPress={() => handleCancelPress(booking.id)}
+                              style={styles.cancelButton}
+                            >
+                              <Text color="#ef4444" fontSize={12} fontWeight="600">
+                                {t('bookings.cancelBooking')}
+                              </Text>
+                            </TouchableOpacity>
+                          )}
                         </XStack>
                       </YStack>
                     </BlurView>
@@ -211,6 +339,75 @@ export default function BookingsScreen() {
           </YStack>
         </ScrollView>
       )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={cancelModalVisible}
+        onRequestClose={() => setCancelModalVisible(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <YStack 
+              backgroundColor="#1a1a1a" 
+              padding="$5" 
+              borderRadius={24} 
+              width="90%" 
+              maxWidth={400}
+              borderWidth={1}
+              borderColor="rgba(255,255,255,0.1)"
+            >
+              <Text fontSize={20} fontWeight="700" color="white" marginBottom="$4">
+                {t('bookings.cancelBooking')}
+              </Text>
+              
+              <Text fontSize={14} color="rgba(255,255,255,0.7)" marginBottom="$2">
+                {t('bookings.cancellationReason')}
+              </Text>
+              
+              <TextInput
+                style={styles.input}
+                multiline
+                numberOfLines={4}
+                maxLength={100}
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                placeholder={t('bookings.cancellationReason')}
+                value={cancellationReason}
+                onChangeText={setCancellationReason}
+              />
+              <Text fontSize={12} color="rgba(255,255,255,0.5)" textAlign="right" marginBottom="$4">
+                {cancellationReason.length}/100
+              </Text>
+
+              <XStack gap="$3" justifyContent="flex-end">
+                <TouchableOpacity 
+                  onPress={() => setCancelModalVisible(false)}
+                  style={styles.modalButtonSecondary}
+                >
+                  <Text color="white" fontWeight="600">Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={submitCancellation}
+                  disabled={isSubmitting || !cancellationReason.trim()}
+                  style={[
+                    styles.modalButtonPrimary,
+                    (!cancellationReason.trim() || isSubmitting) && styles.disabledButton
+                  ]}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color="white" size="small" />
+                  ) : (
+                    <Text color="white" fontWeight="600">{t('bookings.cancelSubmit')}</Text>
+                  )}
+                </TouchableOpacity>
+              </XStack>
+            </YStack>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </Modal>
     </YStack>
   );
 }
@@ -235,5 +432,44 @@ const styles = StyleSheet.create({
   },
   blurContainer: {
     overflow: 'hidden',
+  },
+  cancelButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.2)',
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 12,
+    padding: 12,
+    color: 'white',
+    height: 100,
+    textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  modalButtonSecondary: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  modalButtonPrimary: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 999,
+    backgroundColor: '#ef4444',
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });

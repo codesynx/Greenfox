@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { Image } from 'expo-image';
 import { useAuth } from '../context/AuthContext';
 import { MainNavigator, AuthNavigator } from './navigators';
 
@@ -9,7 +11,13 @@ interface AppContentProps {
 }
 
 export const AppContent = ({ theme }: AppContentProps) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && user?.avatarUrl) {
+      Image.prefetch(user.avatarUrl);
+    }
+  }, [isAuthenticated, user?.avatarUrl]);
 
   // Show loading spinner while checking auth
   if (isLoading) {

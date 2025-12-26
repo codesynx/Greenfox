@@ -163,12 +163,19 @@
     "emptyTitle": "Брондаулар әлі жоқ",
     "emptySubtitle": "Брондауларыңыз осында болады",
     "status": {
-      "pending": "күтілуде",
-      "paid": "төленді",
-      "upcoming": "алдағы",
-      "completed": "аяқталған",
-      "cancelled": "болдырылмаған"
+      "pending": "Күтуде",
+      "paid": "Төленді",
+      "confirmed": "Расталды",
+      "rejected": "Қабылданбады",
+      "cancellation_pending": "Болдырмау қаралуда",
+      "upcoming": "Алдағы",
+      "completed": "Аяқталды",
+      "cancelled": "Болдырылмады"
     },
+    "cancelBooking": "Брондауды болдырмау",
+    "cancellationReason": "Болдырмау себебі",
+    "cancelSubmit": "Өтінішті жіберу",
+    "cancelUnderReview": "Брондауды болдырмау өтінішіңіз қаралуда",
     "checkIn": "Кіру",
     "checkOut": "Шығу",
     "totalPrice": "Жалпы бағасы"
@@ -218,7 +225,10 @@
     },
     "search": {
       "recent": "СОҢҒЫ ІЗДЕУЛЕР",
-      "placeholder": "Іздеу..."
+      "placeholder": "Іздеу...",
+      "found": "Табылды",
+      "results": "Нәтижелер",
+      "foundCount": "{{count}} нәтиже табылды"
     }
   },
   "details": {
@@ -261,7 +271,28 @@
     "price": "Бағасы:",
     "night": "/Түн",
     "confirm": "Растау",
-    "select": "Таңдау"
+    "next": "Келесі",
+    "select": "Таңдау",
+    "adults": "Ересектер",
+    "adultsSubtitle": "13+ жас",
+    "children": "Балалар",
+    "childrenSubtitle": "0-12 жас"
+  },
+  "guestInfo": {
+    "title": "Қонақтар деректері",
+    "fullName": "Аты-жөні",
+    "idType": "Құжат түрі",
+    "iin": "ЖСН",
+    "passport": "Төлқұжат",
+    "iinPlaceholder": "ЖСН енгізіңіз (12 сан)",
+    "passportPlaceholder": "Төлқұжат нөмірін енгізіңіз",
+    "payBook": "Төлеуге өту",
+    "totalPrice": "Жалпы баға",
+    "errors": {
+      "nameRequired": "Аты-жөнін толтыру міндетті",
+      "iinLength": "ЖСН 12 саннан тұруы тиіс",
+      "passportRequired": "Төлқұжат нөмірі міндетті"
+    }
   },
   "payment": {
     "title": "Төлем",
@@ -269,6 +300,8 @@
     "priceDetails": "Баға мәліметтері",
     "roomFee": "Бөлме ақысы",
     "discount": "Жеңілдік",
+    "discountAmount": "Жеңілдік",
+    "priceWithDiscount": "Жеңілдікпен баға",
     "taxes": "Салықтар мен алымдар",
     "total": "Барлығы",
     "paymentMethod": "Төлем әдісі",
@@ -284,5 +317,21 @@
     "cvc": "CVC",
     "saveCard": "Картаны қауіпсіз сақтау",
     "addBtn": "Карта қосу"
+  },
+  "bookingSuccess": {
+    "title": "Төлем расталды",
+    "message": "Сіздің төлеміңіз сәтті өңделді және брондауыңыз расталды.",
+    "homeBtn": "Басты бетке"
+  },
+  "notification": {
+    "booking": {
+      "created": "Төлем сәтті өтті! Брондауыңыз тексерілуде.",
+      "confirmed": "{{hotelName}} брондауыңыз расталды! Сізді күтеміз.",
+      "rejected": "{{hotelName}} брондауыңыз қабылданбады. Қолдау қызметіне хабарласыңыз.",
+      "cancellation_under_review": "Брондауды болдырмау өтінішіңіз қаралуда.",
+      "refund_processed": "Брондау сәтті түрде жойылды.",
+      "completed": "Бізді таңдағаныңызға рахмет!",
+      "cancelled": "Брондауыңыз жойылды."
+    }
   }
 }

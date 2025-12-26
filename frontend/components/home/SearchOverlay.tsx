@@ -257,7 +257,7 @@ export const SearchOverlay = ({ visible, onClose }: SearchOverlayProps) => {
               <YStack flex={1}>
                  <XStack justifyContent="space-between" alignItems="center" marginBottom="$3">
                     <Text color="rgba(255,255,255,0.6)" fontSize={14} fontWeight="600">
-                      Found {backendResults.length} results
+                      {t('home.search.foundCount', { count: backendResults.length })}
                     </Text>
                  </XStack>
                  

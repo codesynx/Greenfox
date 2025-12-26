@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { ScrollView as RNScrollView, Image, StyleSheet, Pressable, Dimensions, View, Animated as RNAnimated } from 'react-native';
+import { ScrollView as RNScrollView, StyleSheet, Pressable, Dimensions, View, Animated as RNAnimated } from 'react-native';
+import { Image } from 'expo-image';
 import { YStack, XStack, Text, Button } from 'tamagui';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -98,7 +99,19 @@ export default function Details() {
   const route = useRoute();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { propertyId } = route.params as { propertyId: string };
+  const { 
+    propertyId, 
+    imageUri, 
+    price: initialPrice, 
+    name: initialName, 
+    location: initialLocation 
+  } = route.params as { 
+    propertyId: string; 
+    imageUri?: string;
+    price?: number;
+    name?: string;
+    location?: string;
+  };
 
   // Reanimated Shared Value for Scroll
   const scrollY = useSharedValue(0);
@@ -196,12 +209,12 @@ export default function Details() {
   };
 
   // Show loading state
-  if (isLoading) {
+  if (isLoading && !resort && !imageUri && !initialName) {
     return <ResortDetailsSkeleton />;
   }
 
   // Show error state
-  if (error || !resort) {
+  if (!isLoading && (error || (!resort && !imageUri && !initialName))) {
     return (
       <YStack flex={1} backgroundColor="#0a0a0a" justifyContent="center" alignItems="center" padding="$4">
         <Text color="white" fontSize={18} marginBottom="$4">Error</Text>
@@ -218,9 +231,12 @@ export default function Details() {
   }
 
   // Prepare data for display
-  const sortedPhotos = resort.photos.sort((a, b) => a.order - b.order);
+  const sortedPhotos = resort 
+    ? resort.photos.sort((a, b) => a.order - b.order) 
+    : (imageUri ? [{ url: imageUri, order: 0, description: null }] : []);
+    
   const mainImage = sortedPhotos.length > 0 ? sortedPhotos[0].url : 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1200';
-  const price = resort.promo && resort.promoPrice ? resort.promoPrice : resort.basePrice;
+  const price = resort ? (resort.promo && resort.promoPrice ? resort.promoPrice : resort.basePrice) : (initialPrice || 0);
 
   const openGallery = (index: number) => {
     setGalleryIndex(index);
@@ -288,7 +304,13 @@ export default function Details() {
               keyExtractor={(item) => item.url}
               renderItem={({ item, index }) => (
                 <Pressable onPress={() => openGallery(index)}>
-                  <Image source={{ uri: item.url }} style={styles.heroImage} />
+                  <Image 
+                    source={{ uri: item.url }} 
+                    style={styles.heroImage}
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
+                  />
                 </Pressable>
               )}
             />
@@ -326,81 +348,111 @@ export default function Details() {
           {/* Content Section */}
           <YStack paddingHorizontal="$4" paddingTop="$5" backgroundColor="#0a0a0a">
             {/* Title */}
-            <Text fontSize={28} fontWeight="700" color="#ffffff" lineHeight={34}>
-              {resort.name}
-            </Text>
+            {(resort || initialName) ? (
+              <Text fontSize={28} fontWeight="700" color="#ffffff" lineHeight={34}>
+                {resort ? resort.name : initialName}
+              </Text>
+            ) : (
+              <View style={{ width: '70%', height: 34, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8 }} />
+            )}
 
             {/* Address */}
             <XStack alignItems="center" gap="$2" marginTop="$2">
               <Location size={20} color="#22c55e" variant="Bold" />
-              <Text fontSize={15} color="rgba(255, 255, 255, 0.7)">
-                {resort.address || resort.city}
-              </Text>
+              {(resort || initialLocation) ? (
+                <Text fontSize={15} color="rgba(255, 255, 255, 0.7)">
+                  {resort ? (resort.address || resort.city) : initialLocation}
+                </Text>
+              ) : (
+                <View style={{ width: '40%', height: 20, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 6 }} />
+              )}
             </XStack>
 
             {/* About */}
-            {resort.description && (
-              <YStack marginTop="$6">
-                <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$3">
-                  {t('details.about')}
-                </Text>
+            <YStack marginTop="$6">
+              <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$3">
+                {t('details.about')}
+              </Text>
+              {resort ? (
                 <Text fontSize={15} color="rgba(255, 255, 255, 0.8)" lineHeight={24}>
                   {resort.description}
                 </Text>
-              </YStack>
-            )}
+              ) : (
+                <YStack gap="$2">
+                   <View style={{ width: '100%', height: 16, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4 }} />
+                   <View style={{ width: '90%', height: 16, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4 }} />
+                   <View style={{ width: '95%', height: 16, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4 }} />
+                </YStack>
+              )}
+            </YStack>
 
             {/* Popular Amenities */}
-            {resort.amenities && resort.amenities.length > 0 && (
-              <YStack marginTop="$6">
-                <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$4">
-                  {t('details.amenities')}
-                </Text>
+            <YStack marginTop="$6">
+              <Text fontSize={18} fontWeight="700" color="#ffffff" marginBottom="$4">
+                {t('details.amenities')}
+              </Text>
 
+              {resort ? (
+                resort.amenities && resort.amenities.length > 0 && (
+                  <YStack>
+                    <RNScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+                      <XStack gap="$4">
+                        {resort.amenities.map((amenityKey) => {
+                          const amenity = AMENITIES_MAP[amenityKey];
+                          if (!amenity) return null;
+
+                          const IconComponent = ICON_COMPONENTS[amenity.icon];
+                          if (!IconComponent) return null;
+
+                          return (
+                            <YStack key={amenityKey} alignItems="center" gap="$2" width={80}>
+                              <YStack
+                                width={64}
+                                height={64}
+                                borderRadius={32}
+                                backgroundColor="rgba(255, 255, 255, 0.05)"
+                                justifyContent="center"
+                                alignItems="center"
+                                borderWidth={1}
+                                borderColor="rgba(255, 255, 255, 0.1)"
+                              >
+                                <IconComponent size={28} color="#22c55e" />
+                              </YStack>
+                              <Text fontSize={12} color="rgba(255, 255, 255, 0.7)" textAlign="center" numberOfLines={2}>
+                                {amenity.label}
+                              </Text>
+                            </YStack>
+                          );
+                        })}
+                      </XStack>
+                    </RNScrollView>
+
+                    {resort.amenities.length > 6 && (
+                      <Pressable style={{ marginTop: 24 }}>
+                        <XStack alignItems="center" gap="$2">
+                          <Text fontSize={15} color="#22c55e" fontWeight="600">
+                            {t('details.allAmenities')}
+                          </Text>
+                          <ArrowRight size={16} color="#22c55e" />
+                        </XStack>
+                      </Pressable>
+                    )}
+                  </YStack>
+                )
+              ) : (
+                // Amenities Skeleton
                 <RNScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
                   <XStack gap="$4">
-                    {resort.amenities.map((amenityKey) => {
-                      const amenity = AMENITIES_MAP[amenityKey];
-                      if (!amenity) return null;
-
-                      const IconComponent = ICON_COMPONENTS[amenity.icon];
-                      if (!IconComponent) return null;
-
-                      return (
-                        <YStack key={amenityKey} alignItems="center" gap="$2" width={80}>
-                          <YStack
-                            width={64}
-                            height={64}
-                            borderRadius={32}
-                            backgroundColor="rgba(255, 255, 255, 0.05)"
-                            justifyContent="center"
-                            alignItems="center"
-                            borderWidth={1}
-                            borderColor="rgba(255, 255, 255, 0.1)"
-                          >
-                            <IconComponent size={28} color="#22c55e" />
-                          </YStack>
-                          <Text fontSize={12} color="rgba(255, 255, 255, 0.7)" textAlign="center" numberOfLines={2}>
-                            {amenity.label}
-                          </Text>
-                        </YStack>
-                      );
-                    })}
+                    {[1, 2, 3, 4].map((i) => (
+                       <YStack key={i} alignItems="center" gap="$2" width={80}>
+                          <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.05)' }} />
+                          <View style={{ width: 50, height: 12, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4 }} />
+                       </YStack>
+                    ))}
                   </XStack>
                 </RNScrollView>
-
-                {resort.amenities.length > 6 && (
-                  <Pressable style={{ marginTop: 24 }}>
-                    <XStack alignItems="center" gap="$2">
-                      <Text fontSize={15} color="#22c55e" fontWeight="600">
-                        {t('details.allAmenities')}
-                      </Text>
-                      <ArrowRight size={16} color="#22c55e" />
-                    </XStack>
-                  </Pressable>
-                )}
-              </YStack>
-            )}
+              )}
+            </YStack>
 
             {/* Photo Gallery */}
             {sortedPhotos.length > 0 && (
@@ -412,7 +464,13 @@ export default function Details() {
                   <XStack gap="$3">
                     {sortedPhotos.map((photo, index) => (
                       <Pressable key={index} onPress={() => openGallery(index)}>
-                        <Image source={{ uri: photo.url }} style={styles.galleryImage} />
+                        <Image 
+                           source={{ uri: photo.url }} 
+                           style={styles.galleryImage}
+                           contentFit="cover"
+                           transition={200}
+                           cachePolicy="memory-disk"
+                        />
                       </Pressable>
                     ))}
                   </XStack>
@@ -437,9 +495,13 @@ export default function Details() {
               {/* Price Info Row */}
               <YStack>
                 <XStack alignItems="baseline" gap="$1">
-                  <Text fontSize={28} fontWeight="700" color="#ffffff">
-                    ₸{price.toLocaleString()}
-                  </Text>
+                  {(resort || initialPrice !== undefined) ? (
+                    <Text fontSize={28} fontWeight="700" color="#ffffff">
+                        ₸{price.toLocaleString()}
+                    </Text>
+                  ) : (
+                    <View style={{ width: 100, height: 32, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 6 }} />
+                  )}
                   <Text fontSize={14} color="rgba(255, 255, 255, 0.6)">
                     {t('details.night')}
                   </Text>
@@ -473,16 +535,19 @@ export default function Details() {
                   fontSize={16}
                   fontWeight="600"
                   pressStyle={{ backgroundColor: '#16a34a' }}
-                  onPress={() => navigation.navigate('SelectDate', {
+                  disabled={!resort}
+                  onPress={() => resort && navigation.navigate('SelectDate', {
                     property: {
                       id: resort.id,
                       name: resort.name,
                       location: resort.city,
-                      price: price,
+                      price: price, // Current price (promo or base)
+                      basePrice: resort.basePrice,
+                      discountPercent: resort.promo && resort.promoDiscountPercent ? resort.promoDiscountPercent : 0,
                       rating: resort.rating,
                       image: mainImage,
                       type: 'resort'
-                    }
+                    } as any
                   })}
                 >
                   {t('details.reserve')}

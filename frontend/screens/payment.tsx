@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Pressable, View, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { ScrollView, Pressable, View, LayoutAnimation, Platform, UIManager, Alert, ActivityIndicator } from 'react-native';
 import { YStack, XStack, Text, Button, Image, Separator } from 'tamagui';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +7,9 @@ import { ArrowLeft, ArrowDown2, Add } from 'iconsax-react-native';
 import { PaymentIcon } from 'react-native-payment-card-icons';
 import { BlurView } from 'expo-blur';
 import { useTranslation } from 'react-i18next';
+import { MotiView } from 'moti';
+import { useAuth } from '../context/AuthContext';
+import { bookingService, BookingCalcResponse } from '../services/bookingService';
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -14,14 +17,24 @@ if (Platform.OS === 'android') {
   }
 }
 
+const SkeletonItem = ({ width: w, height: h, borderRadius = 4, style }: any) => (
+  <MotiView
+    from={{ opacity: 0.3 }}
+    animate={{ opacity: 0.6 }}
+    transition={{ type: 'timing', duration: 1000, loop: true }}
+    style={[{ width: w, height: h, backgroundColor: '#2C2C2C', borderRadius }, style]}
+  />
+);
+
 export default function PaymentScreen() {
   const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   
   // Get data from params
-  const { property, startDate, endDate, guestCount } = (route.params as any) || {};
+  const { property, startDate, endDate, guestCount, adults, children, guestDetails } = (route.params as any) || {};
 
   // Helper to format dates
   const formatDate = (dateString: string | Date) => {
@@ -30,26 +43,37 @@ export default function PaymentScreen() {
     return date.toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
-  const calculateNights = (start: string | Date, end: string | Date) => {
-    if (!start || !end) return 1;
-    const s = new Date(start);
-    const e = new Date(end);
-    const diffTime = Math.abs(e.getTime() - s.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-    return diffDays || 1;
-  };
-
-  const nights = calculateNights(startDate, endDate);
-  const pricePerNight = property?.price || 0;
-  const roomFee = pricePerNight * nights;
-  const discount = 0; // Mock discount for now
-  const taxRate = 0.10;
-  const tax = roomFee * taxRate;
-  const total = roomFee - discount + tax;
-
   const [savedCards, setSavedCards] = useState<any[]>([]);
   const [paymentMethod, setPaymentMethod] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [priceDetails, setPriceDetails] = useState<BookingCalcResponse | null>(null);
+  const [loadingPrice, setLoadingPrice] = useState(true);
+
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (!property) return;
+      
+      try {
+        setLoadingPrice(true);
+        const data = await bookingService.calculatePrice({
+          resortId: property.id,
+          checkInDate: startDate,
+          checkOutDate: endDate,
+          adults: adults || 1,
+          children: children || 0
+        });
+        setPriceDetails(data);
+      } catch (error) {
+        console.error('Price calculation failed:', error);
+        Alert.alert('Error', 'Failed to calculate price');
+      } finally {
+        setLoadingPrice(false);
+      }
+    };
+
+    fetchPrice();
+  }, [property, startDate, endDate, adults, children]);
 
   useEffect(() => {
       const params = route.params as any;
@@ -91,6 +115,43 @@ export default function PaymentScreen() {
       return <PaymentIcon type="generic-card" variant="logo" width={32} height={20} />;
   };
 
+  const handlePayment = async () => {
+    if (!paymentMethod) return;
+    
+    setIsProcessing(true);
+    try {
+        const selectedCard = savedCards.find(c => c.id === paymentMethod);
+        
+        const payload = {
+            resortId: property.id,
+            checkInDate: startDate,
+            checkOutDate: endDate,
+            adults: adults || 1,
+            children: children || 0,
+            guestFullName: guestDetails?.fullName || '',
+            idNumber: guestDetails?.idNumber || '',
+            idType: (guestDetails?.idType || 'IIN').toUpperCase(),
+            phoneNumber: user?.phoneNumber || '',
+            paymentMethod: {
+                type: 'CARD' as const,
+                cardToken: selectedCard?.id || 'mock-token',
+                last4: selectedCard?.last4 || '0000'
+            }
+        };
+
+        await bookingService.createBooking(payload);
+        
+        // Navigate to Success Page
+        navigation.navigate('BookingSuccess' as any);
+        
+    } catch (error) {
+        console.error('Booking failed:', error);
+        Alert.alert('Error', 'Failed to process payment. Please try again.');
+    } finally {
+        setIsProcessing(false);
+    }
+  };
+
   return (
     <YStack flex={1} backgroundColor="#0a0a0a">
       <YStack paddingTop={insets.top} flex={1}>
@@ -121,7 +182,7 @@ export default function PaymentScreen() {
                         {formatDate(startDate)} - {formatDate(endDate)}
                     </Text>
                     <Text fontSize={18} color="#ffffff" fontWeight="700" marginTop="$1">
-                        ₸{property.price.toLocaleString()}
+                        ₸{(property.price || 0).toLocaleString()}
                     </Text>
                 </YStack>
             </XStack>
@@ -131,27 +192,65 @@ export default function PaymentScreen() {
               <Text fontSize={18} fontWeight="600" color="#ffffff">{t('payment.priceDetails')}</Text>
               
               <YStack gap="$3">
-                <XStack justifyContent="space-between">
-                    <Text fontSize={16} color="rgba(255, 255, 255, 0.6)">{t('payment.roomFee')}</Text>
-                    <Text fontSize={16} fontWeight="600" color="#ffffff">₸{roomFee.toLocaleString()}</Text>
-                </XStack>
-                
-                {discount > 0 && (
-                    <XStack justifyContent="space-between">
-                        <Text fontSize={16} color="rgba(255, 255, 255, 0.6)">{t('payment.discount')}</Text>
-                        <Text fontSize={16} fontWeight="600" color="#ef4444">- ₸{discount.toLocaleString()}</Text>
+                {loadingPrice ? (
+                  <>
+                    <XStack justifyContent="space-between"><SkeletonItem width={120} height={20} /><SkeletonItem width={80} height={20} /></XStack>
+                    <XStack justifyContent="space-between"><SkeletonItem width={100} height={20} /><SkeletonItem width={90} height={20} /></XStack>
+                    <XStack justifyContent="space-between"><SkeletonItem width={80} height={20} /><SkeletonItem width={60} height={20} /></XStack>
+                    <Separator borderColor="rgba(255,255,255,0.1)" marginVertical="$2" />
+                    <XStack justifyContent="space-between" alignItems="center">
+                      <SkeletonItem width={60} height={24} />
+                      <SkeletonItem width={120} height={32} />
                     </XStack>
-                )}
+                  </>
+                ) : priceDetails ? (
+                  <>
+                    {/* 1. Original Price (if discount) */}
+                    {priceDetails.discountPercent > 0 && (
+                      <XStack justifyContent="space-between">
+                          <Text fontSize={16} color="rgba(255, 255, 255, 0.6)">{t('payment.roomFee')}</Text>
+                          <Text fontSize={16} fontWeight="400" color="rgba(255, 255, 255, 0.4)" textDecorationLine="line-through">
+                            ₸{(priceDetails.baseTotal || 0).toLocaleString()}
+                          </Text>
+                      </XStack>
+                    )}
 
-                <XStack justifyContent="space-between">
-                    <Text fontSize={16} color="rgba(255, 255, 255, 0.6)">{t('payment.taxes')}</Text>
-                    <Text fontSize={16} fontWeight="600" color="#ffffff">₸{tax.toLocaleString()}</Text>
-                </XStack>
-                
-                <XStack justifyContent="space-between" alignItems="center" marginTop="$2">
-                    <Text fontSize={20} fontWeight="600" color="#ffffff">{t('payment.total')}</Text>
-                    <Text fontSize={24} fontWeight="700" color="#ffffff">₸{total.toLocaleString()}</Text>
-                </XStack>
+                    {/* 2. Discount Amount (if discount) */}
+                    {priceDetails.discountPercent > 0 && (
+                        <XStack justifyContent="space-between" alignItems="center">
+                             <XStack gap="$2" alignItems="center">
+                                <Text fontSize={16} color="rgba(255, 255, 255, 0.6)">{t('payment.discountAmount')}</Text>
+                                <View style={{ backgroundColor: '#ef4444', borderRadius: 4, paddingHorizontal: 6, paddingVertical: 2 }}>
+                                    <Text fontSize={12} color="white" fontWeight="700">-{priceDetails.discountPercent}%</Text>
+                                </View>
+                            </XStack>
+                            <Text fontSize={16} fontWeight="600" color="#ef4444">- ₸{(priceDetails.discountAmount || 0).toLocaleString()}</Text>
+                        </XStack>
+                    )}
+
+                    {/* 3. Price with Discount (or just Room Fee) */}
+                    <XStack justifyContent="space-between">
+                        <Text fontSize={16} color="rgba(255, 255, 255, 0.6)">
+                          {priceDetails.discountPercent > 0 ? t('payment.priceWithDiscount') : t('payment.roomFee')}
+                        </Text>
+                        <Text fontSize={16} fontWeight="600" color="#ffffff">₸{(priceDetails.discountedPrice || 0).toLocaleString()}</Text>
+                    </XStack>
+
+                    {/* 4. Taxes */}
+                    <XStack justifyContent="space-between">
+                        <Text fontSize={16} color="rgba(255, 255, 255, 0.6)">{t('payment.taxes')}</Text>
+                        <Text fontSize={16} fontWeight="600" color="#ffffff">₸{(priceDetails.tax || 0).toLocaleString()}</Text>
+                    </XStack>
+                    
+                    {/* 5. Total */}
+                    <XStack justifyContent="space-between" alignItems="center" marginTop="$2">
+                        <Text fontSize={20} fontWeight="600" color="#ffffff">{t('payment.total')}</Text>
+                        <Text fontSize={24} fontWeight="700" color="#22c55e">₸{(priceDetails.totalPrice || 0).toLocaleString()}</Text>
+                    </XStack>
+                  </>
+                ) : (
+                  <Text color="#ef4444">Failed to load price.</Text>
+                )}
               </YStack>
             </YStack>
 
@@ -234,15 +333,21 @@ export default function PaymentScreen() {
         {/* Floating Button */}
         <YStack position="absolute" bottom={insets.bottom + 20} left="$4" right="$4">
             <Button 
-                backgroundColor="#22c55e"
+                backgroundColor={paymentMethod ? "#22c55e" : "#333333"}
+                disabled={!paymentMethod || isProcessing || !priceDetails}
                 borderRadius={999} 
                 height={56}
-                onPress={() => {
-                    // Handle payment confirmation
-                }}
+                onPress={handlePayment}
                 pressStyle={{ opacity: 0.8 }}
+                opacity={paymentMethod && priceDetails ? 1 : 0.6}
             >
-                <Text color="#ffffff" fontWeight="700" fontSize={16}>{t('payment.payNow')}</Text>
+                {isProcessing ? (
+                    <ActivityIndicator color="#ffffff" />
+                ) : (
+                    <Text color={paymentMethod && priceDetails ? "#ffffff" : "#888888"} fontWeight="700" fontSize={16}>
+                        {t('payment.payNow')}
+                    </Text>
+                )}
             </Button>
         </YStack>
 

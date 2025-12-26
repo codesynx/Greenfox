@@ -163,12 +163,19 @@
     "emptyTitle": "Нет бронирований",
     "emptySubtitle": "Ваши бронирования будут здесь",
     "status": {
-      "pending": "ожидание",
-      "paid": "оплачено",
-      "upcoming": "предстоящее",
-      "completed": "завершено",
-      "cancelled": "отменено"
+      "pending": "Ожидание",
+      "paid": "Оплачено",
+      "confirmed": "Подтверждено",
+      "rejected": "Отклонено",
+      "cancellation_pending": "Отмена рассматривается",
+      "upcoming": "Предстоящее",
+      "completed": "Завершено",
+      "cancelled": "Отменено"
     },
+    "cancelBooking": "Отменить бронирование",
+    "cancellationReason": "Причина отмены",
+    "cancelSubmit": "Отправить запрос",
+    "cancelUnderReview": "Ваша заявка на отмену рассматривается",
     "checkIn": "Заезд",
     "checkOut": "Выезд",
     "totalPrice": "Итоговая цена"
@@ -218,7 +225,10 @@
     },
     "search": {
       "recent": "НЕДАВНИЕ ПОИСКИ",
-      "placeholder": "Поиск..."
+      "placeholder": "Поиск...",
+      "found": "Найдено",
+      "results": "Результаты",
+      "foundCount": "Найдено {{count}} результатов"
     }
   },
   "details": {
@@ -261,7 +271,28 @@
     "price": "Цена:",
     "night": "/Ночь",
     "confirm": "Подтвердить",
-    "select": "Выбрать"
+    "next": "Далее",
+    "select": "Выбрать",
+    "adults": "Взрослые",
+    "adultsSubtitle": "Возраст 13+",
+    "children": "Дети",
+    "childrenSubtitle": "Возраст 0-12"
+  },
+  "guestInfo": {
+    "title": "Данные гостей",
+    "fullName": "ФИО",
+    "idType": "Тип документа",
+    "iin": "ИИН",
+    "passport": "Паспорт",
+    "iinPlaceholder": "Введите ИИН (12 цифр)",
+    "passportPlaceholder": "Введите номер паспорта",
+    "payBook": "Перейти к оплате",
+    "totalPrice": "Итоговая цена",
+    "errors": {
+      "nameRequired": "ФИО обязательно",
+      "iinLength": "ИИН должен содержать 12 цифр",
+      "passportRequired": "Номер паспорта обязателен"
+    }
   },
   "payment": {
     "title": "Оплата",
@@ -269,6 +300,8 @@
     "priceDetails": "Детали цены",
     "roomFee": "Стоимость номера",
     "discount": "Скидка",
+    "discountAmount": "Скидка",
+    "priceWithDiscount": "Цена со скидкой",
     "taxes": "Налоги и сборы",
     "total": "Итого",
     "paymentMethod": "Способ оплаты",
@@ -284,5 +317,21 @@
     "cvc": "CVC",
     "saveCard": "Безопасно сохранить карту",
     "addBtn": "Добавить карту"
+  },
+  "bookingSuccess": {
+    "title": "Оплата подтверждена",
+    "message": "Ваш платеж успешно обработан, и ваше бронирование подтверждено.",
+    "homeBtn": "На главную"
+  },
+  "notification": {
+    "booking": {
+      "created": "Оплата прошла успешно! Ваше бронирование на проверке.",
+      "confirmed": "Ваше бронирование в {{hotelName}} подтверждено! Ждем вас.",
+      "rejected": "Ваше бронирование в {{hotelName}} отклонено. Пожалуйста, свяжитесь с поддержкой.",
+      "cancellation_under_review": "Ваша заявка на отмену рассматривается.",
+      "refund_processed": "Бронирование успешно отменено.",
+      "completed": "Спасибо, что выбрали нас!",
+      "cancelled": "Ваше бронирование отменено."
+    }
   }
 }

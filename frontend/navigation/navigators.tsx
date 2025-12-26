@@ -17,8 +17,10 @@ import HelpCenterScreen from '../screens/help-center';
 import TermsScreen from '../screens/terms';
 import PrivacyScreen from '../screens/privacy';
 import NotificationsScreen from '../screens/notifications';
+import GuestInfoScreen from '../screens/guest-info';
 import PaymentScreen from '../screens/payment';
 import AddCardScreen from '../screens/add-card';
+import BookingSuccessScreen from '../screens/booking-success';
 import PromoDetailsScreen from '../screens/promo-details';
 import AllPromosScreen from '../screens/all-promos';
 import { PromoResponse } from '../services/promoService';
@@ -117,8 +119,10 @@ export function MainNavigator() {
        <MainStack.Screen name="Terms" component={TermsScreen} />
        <MainStack.Screen name="Privacy" component={PrivacyScreen} />
        <MainStack.Screen name="Notifications" component={NotificationsScreen} />
+       <MainStack.Screen name="GuestInfo" component={GuestInfoScreen} />
        <MainStack.Screen name="Payment" component={PaymentScreen} />
        <MainStack.Screen name="AddCard" component={AddCardScreen} />
+       <MainStack.Screen name="BookingSuccess" component={BookingSuccessScreen} options={{ gestureEnabled: false }} />
        <MainStack.Screen 
          name="PromoDetails" 
          component={PromoDetailsScreen}
@@ -167,13 +171,28 @@ declare global {
       Terms: undefined;
       Privacy: undefined;
       Notifications: undefined;
+      GuestInfo: {
+        property: any;
+        startDate: string;
+        endDate: string;
+        adults: number;
+        children: number;
+      };
       Payment: {
         property: any;
         startDate: string;
         endDate: string;
         guestCount: number;
+        adults: number;
+        children: number;
+        guestDetails: {
+            fullName: string;
+            idType: 'iin' | 'passport';
+            idNumber: string;
+        };
       };
       AddCard: undefined;
+      BookingSuccess: undefined;
       PromoDetails: {
         promo: PromoResponse;
       };
