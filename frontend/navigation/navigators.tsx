@@ -25,6 +25,8 @@ import PromoDetailsScreen from '../screens/promo-details';
 import AllPromosScreen from '../screens/all-promos';
 import { PromoResponse } from '../services/promoService';
 import { Home, Heart, Calendar, User } from 'iconsax-react-native';
+import { TripsAIIcon } from '../components/TripsAIIcon';
+import AIChatScreen from '../screens/ai-chat';
 
 const TabLabel = ({ titleKey, color }: { titleKey: string; color: string }) => {
   const { t } = useTranslation();
@@ -57,6 +59,16 @@ function TabsNavigator() {
             tabBarLabel: ({ color }) => <TabLabel titleKey="tabs.home" color={color} />,
             tabBarIcon: ({ color, focused }) => (
                 <Home size={24} color={color} variant={focused ? 'Bold' : 'Linear'} />
+            ),
+        }}
+      />
+      <Tab.Screen 
+        name="AIChat" 
+        component={AIChatScreen} 
+        options={{
+            tabBarLabel: ({ color }) => <TabLabel titleKey="tabs.aiChat" color={color} />,
+            tabBarIcon: ({ color, focused }) => (
+                <TripsAIIcon size={24} color={color} />
             ),
         }}
       />

@@ -94,11 +94,12 @@ export default function PhoneNumberScreen() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 20 : 0}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <YStack flex={1} backgroundColor="#0a0a0a" paddingHorizontal="$6" paddingTop={insets.top} paddingBottom={insets.bottom} justifyContent="center">
+        <YStack flex={1} backgroundColor="#0a0a0a" paddingHorizontal="$6" paddingTop={insets.top}>
           <StatusBar barStyle="light-content" />
-          <YStack gap="$6" marginBottom="$10">
+          <YStack flex={1} justifyContent="center" gap="$6">
             <YStack gap="$3">
             <Text fontSize={32} fontWeight="700" color="#ffffff">
               {t('phoneNumber.title')}
@@ -126,7 +127,10 @@ export default function PhoneNumberScreen() {
                 borderRadius={999}
                 fontSize={16}
                 paddingHorizontal="$4"
-                paddingVertical="$4"
+                paddingVertical={0}
+                height={56}
+                textAlignVertical="center"
+                style={{ includeFontPadding: false }}
                 color="#ffffff"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 focusStyle={{
@@ -148,22 +152,24 @@ export default function PhoneNumberScreen() {
             </YStack>
           </YStack>
 
-          <Button
-            backgroundColor={isValid && !isLoading ? '#22c55e' : 'rgba(255, 255, 255, 0.1)'}
-            color={isValid && !isLoading ? 'white' : 'rgba(255, 255, 255, 0.5)'}
-            borderRadius={999}
-            height={56}
-            fontSize={16}
-            fontWeight="600"
-            pressStyle={{
-              backgroundColor: isValid && !isLoading ? '#16a34a' : 'rgba(255, 255, 255, 0.1)',
-            }}
-            disabled={!isValid || isLoading}
-            onPress={handleContinue}
-            icon={isLoading ? <Spinner color="white" /> : undefined}
-          >
-            {isLoading ? t('phoneNumber.sending') : t('phoneNumber.continue')}
-          </Button>
+          <YStack marginBottom={insets.bottom > 0 ? insets.bottom : 20}>
+            <Button
+              backgroundColor={isValid && !isLoading ? '#22c55e' : 'rgba(255, 255, 255, 0.1)'}
+              color={isValid && !isLoading ? 'white' : 'rgba(255, 255, 255, 0.5)'}
+              borderRadius={999}
+              height={56}
+              fontSize={16}
+              fontWeight="600"
+              pressStyle={{
+                backgroundColor: isValid && !isLoading ? '#16a34a' : 'rgba(255, 255, 255, 0.1)',
+              }}
+              disabled={!isValid || isLoading}
+              onPress={handleContinue}
+              icon={isLoading ? <Spinner color="white" /> : undefined}
+            >
+              {isLoading ? t('phoneNumber.sending') : t('phoneNumber.continue')}
+            </Button>
+          </YStack>
         </YStack>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

@@ -50,10 +50,11 @@ import {
   Security,
   CloseCircle,
 } from 'iconsax-react-native';
+import { Flame, Trees, Shirt } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import { resortService, ResortDetails } from '../services/resortService';
 import { useFavorites } from '../contexts/FavoritesContext';
-import { AMENITIES_MAP } from '@shared/amenities.config';
+import { AMENITIES_MAP } from '../config/amenities.config';
 import { ImageViewerModal } from '../components/ImageViewerModal';
 import { ResortDetailsSkeleton } from '../components/ResortDetailsSkeleton';
 
@@ -92,6 +93,9 @@ const ICON_COMPONENTS: Record<string, any> = {
   Security,
   CloseCircle,
   Location,
+  Fire: Flame,
+  TreeCircle: Trees,
+  Shirt: Shirt,
 };
 
 export default function Details() {
@@ -419,7 +423,7 @@ export default function Details() {
                                 <IconComponent size={28} color="#22c55e" />
                               </YStack>
                               <Text fontSize={12} color="rgba(255, 255, 255, 0.7)" textAlign="center" numberOfLines={2}>
-                                {amenity.label}
+                                {t(`details.amenityList.${amenity.key}`, { defaultValue: amenity.label })}
                               </Text>
                             </YStack>
                           );

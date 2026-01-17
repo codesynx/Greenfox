@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { getTokens, saveTokens, clearTokens } from '../utils/secureStorage';
 
-const BASE_URL = 'https://octopus-app-6egtt.ondigitalocean.app/api/v1';
+const BASE_URL = 'http://localhost:8080/api/v1';
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,

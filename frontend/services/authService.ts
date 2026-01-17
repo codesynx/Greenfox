@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'https://octopus-app-6egtt.ondigitalocean.app/api/v1';
+const BASE_URL = 'http://localhost:8080/api/v1';
 
 export interface ApiResponse<T> {
   success: boolean;
